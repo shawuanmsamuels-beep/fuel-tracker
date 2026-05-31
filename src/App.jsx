@@ -685,7 +685,7 @@ export default function App() {
         <div style={{ display: "flex", gap: 24, maxWidth: 860, margin: "0 auto", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start" }}>
           <PricingCard plan="MONTHLY" price="$9.99" period="/ month" badge={null} highlight={false}
             features={["Full calorie & macro tracking", "3M+ food database (live search)", "Personalised calorie goals", "Auto-save — never lose data", "7-day free trial included", "Cancel anytime"]}
-            cta="Start Free Trial" ctaLink="https://buy.stripe.com/aFafZi1tidBa9OgbC828800" />
+            cta="Start Free Trial" ctaLink="https://buy.stripe.com/test_aFafZi1tidBa9OgbC828800" />
           <PricingCard plan="ANNUAL" price="$79" period="/ year" badge="BEST VALUE — SAVE 34%" highlight={true}
             features={["Everything in Monthly", "Priority customer support", "Early access to new features", "Nutrition coaching resources", "7-day free trial included", "One payment, full year access"]}
             cta="Get Annual Plan" ctaLink="https://buy.stripe.com/5kQfZi4Fu9kU4tW21y28801" />
