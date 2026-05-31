@@ -710,7 +710,7 @@ export default function App() {
           <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: "clamp(36px,6vw,72px)", letterSpacing: -3, marginBottom: 20, lineHeight: 1.05 }}>
             YOUR BEST BODY<br /><span style={{ color: "#C8F564" }}>STARTS TODAY.</span>
           </h2>
-          <p style={{ color: "#888", fontSize: 15, maxWidth: 420, margin: "0 auto 40px", lineHeight: 1.7 }}>Join 50,000+ people already hitting their goals. 7 days free, then just $9.99/mo — or save 34% annually.</p>
+          <p style={{ color: "#888", fontSize: 15, maxWidth: 420, margin: "0 auto 40px", lineHeight: 1.7 }}>"Start your transformation today. 7 days free, then just $9.99/mo — or save 34% annually.</p>
           <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={handleStartTrial} style={{ background: "#C8F564", color: "#0d0d1a", border: "none", borderRadius: 14, padding: "18px 42px", cursor: "pointer", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16 }}>
               Try Free for 7 Days →
