@@ -688,7 +688,7 @@ export default function App() {
             cta="Start Free Trial" ctaLink="https://buy.stripe.com/28E3cw5Jy9kUbWo49G28802" />
           <PricingCard plan="ANNUAL" price="$79" period="/ year" badge="BEST VALUE — SAVE 34%" highlight={true}
             features={["Everything in Monthly", "Priority customer support", "Early access to new features", "Nutrition coaching resources", "7-day free trial included", "One payment, full year access"]}
-            cta="Get Annual Plan" ctaLink="https://buy.stripe.com/5kQfZi4Fu9kU4tW21y28801" />
+            cta="Get Annual Plan" ctaLink="https://buy.stripe.com/8x2cN67RG40AbWo7lS28803" />
         </div>
         <div style={{ textAlign: "center", marginTop: 32, color: "#555", fontSize: 12 }}>
           Annual saves you <span style={{ color: "#C8F564" }}>$40.88</span> vs monthly · 🛡️ 30-day money-back guarantee on all plans
