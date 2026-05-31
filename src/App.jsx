@@ -599,7 +599,7 @@ export default function App() {
         </div>
 
         <div style={{ display: "flex", gap: 48, marginTop: 60, flexWrap: "wrap", justifyContent: "center" }}>
-          {[["3M+", "Foods in Database"], ["50K+", "Active Users"], ["4.9★", "Average Rating"]].map(([val, label]) => (
+          {[["3M+", "Foods in Database"], ["2026", "App Launch"], ["30-Day", "Guarantee"]].map(([val, label]) => (
             <div key={label} style={{ textAlign: "center" }}>
               <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28, color: "#C8F564" }}>{val}</div>
               <div style={{ fontSize: 10, color: "#555", letterSpacing: 2, marginTop: 4 }}>{label.toUpperCase()}</div>
