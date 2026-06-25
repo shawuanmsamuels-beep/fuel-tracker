@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const MC = { protein: "#FF6B6B", carbs: "#FFD93D", fat: "#6BCB77" };
@@ -106,6 +106,37 @@ function MacroBar({ protein, carbs, fat }) {
         ))}
       </div>
     </div>
+  );
+}
+
+// ── WEIGHT CHART ─────────────────────────────────────────────────────────────
+function WeightChart({ data }) {
+  const W = 320, H = 150, padX = 12, padTop = 16, padBot = 24;
+  if (data.length === 0) return null;
+  const weights = data.map(d => d.weight);
+  let min = Math.min(...weights), max = Math.max(...weights);
+  if (min === max) { min -= 1; max += 1; }
+  const chartW = W - padX * 2, chartH = H - padTop - padBot;
+  const x = i => data.length === 1 ? W / 2 : padX + (i / (data.length - 1)) * chartW;
+  const y = w => padTop + (1 - (w - min) / (max - min)) * chartH;
+  const pts = data.map((d, i) => `${x(i)},${y(d.weight)}`).join(" ");
+  const area = `${padX},${padTop + chartH} ${pts} ${padX + chartW},${padTop + chartH}`;
+  const fmt = s => { const [, m, d] = s.split("-"); return `${+m}/${+d}`; };
+  return (
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: "block" }}>
+      {[0, 0.5, 1].map(t => (
+        <line key={t} x1={padX} x2={W - padX} y1={padTop + t * chartH} y2={padTop + t * chartH} stroke="#1a1a2e" strokeWidth="1" />
+      ))}
+      {data.length > 1 && <polygon points={area} fill="#C8F56415" />}
+      {data.length > 1 && <polyline points={pts} fill="none" stroke="#C8F564" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />}
+      {data.map((d, i) => (
+        <circle key={i} cx={x(i)} cy={y(d.weight)} r={i === data.length - 1 ? 4 : 3} fill="#C8F564" stroke="#0d0d1a" strokeWidth="1.5" />
+      ))}
+      <text x={W - padX} y={padTop + 3} textAnchor="end" fill="#555" fontSize="9" fontFamily="'DM Mono',monospace">{max.toFixed(1)}</text>
+      <text x={W - padX} y={padTop + chartH + 3} textAnchor="end" fill="#555" fontSize="9" fontFamily="'DM Mono',monospace">{min.toFixed(1)}</text>
+      {data.length > 1 && <text x={padX} y={H - 6} textAnchor="start" fill="#555" fontSize="9" fontFamily="'DM Mono',monospace">{fmt(data[0].date)}</text>}
+      <text x={W - padX} y={H - 6} textAnchor="end" fill="#555" fontSize="9" fontFamily="'DM Mono',monospace">{fmt(data[data.length - 1].date)}</text>
+    </svg>
   );
 }
 
@@ -235,6 +266,8 @@ function TrackerApp({ profile, onBack, embedded = false }) {
   const [activeTab, setActiveTab] = useState("log");
   const [showDrop, setShowDrop] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [weights, setWeights] = useState(() => LS.get("ft_weight", []));
+  const [weightInput, setWeightInput] = useState("");
   const debounceRef = useRef(null);
 
   // Persist entries
@@ -244,6 +277,9 @@ function TrackerApp({ profile, onBack, embedded = false }) {
     const t = setTimeout(() => setSaved(false), 1500);
     return () => clearTimeout(t);
   }, [entries]);
+
+  // Persist weight log
+  useEffect(() => { LS.set("ft_weight", weights); }, [weights]);
 
   // Debounced food search
   useEffect(() => {
@@ -276,8 +312,28 @@ function TrackerApp({ profile, onBack, embedded = false }) {
     total: entries.filter(e => e.meal === m).reduce((s, e) => s + e.calories * e.qty, 0),
   }));
 
+  // Weight tracking
+  const sortedWeights = [...weights].sort((a, b) => a.date.localeCompare(b.date));
+  const todayWeight = weights.find(e => e.date === TODAY);
+  const current = sortedWeights.length ? sortedWeights[sortedWeights.length - 1].weight : 0;
+  const start = sortedWeights.length ? sortedWeights[0].weight : 0;
+  const change = current - start;
+  const changeColor = change === 0 ? "#888"
+    : (change < 0 && profile?.goal === "lose") || (change > 0 && profile?.goal === "gain") ? "#C8F564"
+    : (change > 0 && profile?.goal === "lose") || (change < 0 && profile?.goal === "gain") ? "#FF6B6B"
+    : "#888";
+  const fmtShort = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("en-US", { month: "short", day: "numeric" }); };
+
+  const logWeight = () => {
+    const w = parseFloat(weightInput);
+    if (!w || w <= 0) return;
+    setWeights(prev => [...prev.filter(e => e.date !== TODAY), { date: TODAY, weight: w }]);
+    setWeightInput("");
+  };
+  const removeWeight = (date) => setWeights(prev => prev.filter(e => e.date !== date));
+
   return (
-    <div style={{ background: "#0d0d1a", ...(embedded ? { borderRadius: 16, overflow: "hidden", border: "1px solid #1e1e30", maxWidth: 420, margin: "0 auto" } : { minHeight: "100vh" }) }}>
+    <div style={{ background: "#0d0d1a", ...(embedded ? { borderRadius: 16, overflow: "hidden", border: "1px solid #1e1e30", maxWidth: 420, margin: "0 auto" } : { minHeight: "100vh", maxWidth: 640, margin: "0 auto", borderLeft: "1px solid #1e1e30", borderRight: "1px solid #1e1e30" }) }}>
       {/* Header */}
       <div style={{ background: "linear-gradient(180deg,#13132a 0%,#0d0d1a 100%)", padding: "20px 20px 16px", borderBottom: "1px solid #1e1e30", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
@@ -307,7 +363,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
 
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: "1px solid #1e1e30" }}>
-        {["log", "summary"].map(tab => (
+        {["log", "summary", "weight"].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={{
             flex: 1, padding: "12px 0", border: "none", background: "none", cursor: "pointer",
             color: activeTab === tab ? "#C8F564" : "#444", fontFamily: "'DM Mono',monospace",
@@ -431,6 +487,61 @@ function TrackerApp({ profile, onBack, embedded = false }) {
           )}
         </div>
       )}
+
+      {activeTab === "weight" && (
+        <div style={{ padding: "20px 16px" }}>
+          {/* Log today's weight */}
+          <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginBottom: 12 }}>
+            <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 12 }}>{todayWeight ? "UPDATE TODAY'S WEIGHT" : "LOG TODAY'S WEIGHT"}</div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input type="number" value={weightInput} onChange={e => setWeightInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && logWeight()}
+                placeholder={todayWeight ? `${todayWeight.weight} kg` : "Enter weight"}
+                style={{ flex: 1, padding: "12px 14px", background: "#0d0d1a", border: "1px solid #2a2a40", borderRadius: 8, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 14 }} />
+              <span style={{ color: "#444", fontSize: 12 }}>kg</span>
+              <button onClick={logWeight} disabled={!weightInput}
+                style={{ padding: "0 18px", height: 42, background: weightInput ? "#C8F564" : "#1e1e30", color: weightInput ? "#0d0d1a" : "#555", border: "none", borderRadius: 8, cursor: weightInput ? "pointer" : "default", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 13 }}>
+                {todayWeight ? "Update" : "Save"}
+              </button>
+            </div>
+          </div>
+
+          {sortedWeights.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#2a2a40" }}>
+              <div style={{ fontSize: 36, marginBottom: 8 }}>📉</div>
+              <div style={{ fontSize: 10, letterSpacing: 2 }}>LOG YOUR WEIGHT TO SEE PROGRESS</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
+                {[["Current", current.toFixed(1) + " kg", "#C8F564"], ["Start", start.toFixed(1) + " kg", "#888"], ["Change", (change > 0 ? "+" : "") + change.toFixed(1) + " kg", changeColor]].map(([label, val, color]) => (
+                  <div key={label} style={{ background: "#13132a", borderRadius: 8, padding: "12px 10px", border: "1px solid #1e1e30", textAlign: "center" }}>
+                    <div style={{ fontSize: 9, color: "#555", letterSpacing: 2, marginBottom: 4 }}>{label.toUpperCase()}</div>
+                    <div style={{ fontSize: 17, fontFamily: "'Syne',sans-serif", fontWeight: 800, color }}>{val}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginBottom: 12 }}>
+                <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 12 }}>PROGRESS</div>
+                <WeightChart data={sortedWeights} />
+              </div>
+
+              <div style={{ background: "#13132a", borderRadius: 10, padding: "8px 0", border: "1px solid #1e1e30" }}>
+                {[...sortedWeights].reverse().map((e, i, arr) => (
+                  <div key={e.date} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 16px", borderBottom: i < arr.length - 1 ? "1px solid #1e1e30" : "none" }}>
+                    <span style={{ fontSize: 11, color: "#888", fontFamily: "'DM Mono',monospace" }}>{fmtShort(e.date)}{e.date === TODAY ? " · Today" : ""}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <span style={{ fontSize: 13, color: "#C8F564", fontFamily: "'DM Mono',monospace" }}>{e.weight.toFixed(1)} kg</span>
+                      <button onClick={() => removeWeight(e.date)} style={{ background: "none", border: "none", color: "#FF6B6B", cursor: "pointer", opacity: 0.5, fontSize: 16 }}>×</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -523,14 +634,14 @@ export default function App() {
 
   if (view === "onboard") return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
       <Onboarding onDone={(p) => { setProfile(p); setView("app"); }} />
     </>
   );
 
   if (view === "app") return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
       <TrackerApp profile={profile} onBack={() => setView("landing")} />
     </>
   );
@@ -539,7 +650,6 @@ export default function App() {
   return (
     <div style={{ background: "#0d0d1a", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", overflowX: "hidden" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth}
         ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
         input{outline:none}

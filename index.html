@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fuel Tracker</title>
+
+    <!-- Start the connection to Google's font servers early so fonts load fast -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Download the two fonts the app is designed with: Syne (headings) + DM Mono (body/numbers) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Base page styling: dark background, no default margins, sensible default font -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0d0d1a;
+        font-family: "DM Mono", monospace;
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
