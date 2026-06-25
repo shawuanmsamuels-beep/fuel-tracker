@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const MC = { protein: "#FF6B6B", carbs: "#FFD93D", fat: "#6BCB77" };
@@ -634,14 +634,14 @@ export default function App() {
 
   if (view === "onboard") return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
       <Onboarding onDone={(p) => { setProfile(p); setView("app"); }} />
     </>
   );
 
   if (view === "app") return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
       <TrackerApp profile={profile} onBack={() => setView("landing")} />
     </>
   );
@@ -650,7 +650,6 @@ export default function App() {
   return (
     <div style={{ background: "#0d0d1a", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", overflowX: "hidden" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0} html{scroll-behavior:smooth}
         ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
         input{outline:none}
