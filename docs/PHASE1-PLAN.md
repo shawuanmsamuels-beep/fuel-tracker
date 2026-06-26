@@ -79,11 +79,30 @@ choice (hosted auth + Postgres database, generous free tier).
 ---
 
 # Phase 2 — Payments (later, after Phase 1)
-Decision still open — owner to choose:
+
+**DECISION (owner, leaning):** go with **Option B — full subscription gating.**
+The owner wants a canceled subscription to **restrict access** to the app.
+
 - **Option A (simple):** keep existing **Stripe Payment Links** (already in the app).
-  Money reaches the owner, but the app can't auto-unlock per user.
-- **Option B (full):** Stripe Checkout + subscriptions with free trial that
+  Money reaches the owner, but the app can't auto-unlock per user. (Not chosen.)
+- **Option B (full, chosen):** Stripe Checkout + subscriptions with a free trial that
   **auto-unlock/lock** the app based on payment status. Needs a serverless
-  function (Netlify Functions) + a Stripe webhook + a `subscription` flag in Supabase.
+  function (Netlify Functions) + a Stripe webhook + a `subscription` status column
+  on the `profiles` table in Supabase.
+
+### Gating behavior (agreed design)
+- A valid **free trial OR active subscription** is required to USE the tracker.
+- On cancellation / lapse: the user can **still log in and their data is preserved**,
+  but the tracker is replaced by a **"Your subscription ended — resubscribe"** wall.
+- **Do NOT block login entirely** — that traps users out of their own data and
+  invites chargebacks. Restrict *features*, not *login*. (Netflix model.)
+
+### Rough Phase 2 build steps (for later)
+1. Add a `subscription_status` (+ `trial_ends_at`) column to `profiles`.
+2. Stripe Checkout for the trial/subscription (replace the static payment links).
+3. Netlify serverless function + Stripe **webhook** to update `subscription_status`
+   when payments succeed / subscriptions cancel.
+4. Gate the `app` view: if status is not active/trialing → show the resubscribe wall.
+5. Store the Stripe **secret key** + webhook secret as **Netlify env vars** (never in code).
 
 Build accounts (Phase 1) **before** payment gating (Phase 2).
