@@ -53,19 +53,22 @@ async function searchFoods(query) {
   if (!query || query.length < 2) return [];
   try {
     const res = await fetch(
-      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=12&fields=product_name,nutriments,brands,serving_size`
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&fields=product_name,nutriments,brands,serving_size`
     );
     const data = await res.json();
+    const seen = new Set();
     return (data.products || [])
       .filter(p => p.product_name && p.nutriments?.["energy-kcal_100g"] > 0)
       .map(p => ({
-        name: [p.brands, p.product_name].filter(Boolean).join(" — ").slice(0, 60),
+        name: [p.brands, p.product_name].filter(Boolean).join(" — ").trim().slice(0, 60),
         calories: Math.round(p.nutriments["energy-kcal_100g"] || 0),
         protein: Math.round((p.nutriments["proteins_100g"] || 0) * 10) / 10,
         carbs: Math.round((p.nutriments["carbohydrates_100g"] || 0) * 10) / 10,
         fat: Math.round((p.nutriments["fat_100g"] || 0) * 10) / 10,
         serving: p.serving_size || "100g",
-      }));
+      }))
+      .filter(p => { const k = p.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
+      .slice(0, 15);
   } catch { return []; }
 }
 
@@ -364,7 +367,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
       {/* Tabs */}
       <div style={{ display: "flex", borderBottom: "1px solid #2c2d40" }}>
         {["log", "summary", "weight"].map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} style={{
+          <button key={tab} className="ft-tab" onClick={() => setActiveTab(tab)} style={{
             flex: 1, padding: "12px 0", border: "none", background: "none", cursor: "pointer",
             color: activeTab === tab ? "#C8F564" : "#9a9cb4", fontFamily: "'DM Mono',monospace",
             fontSize: 10, letterSpacing: 3, textTransform: "uppercase",
@@ -390,17 +393,20 @@ function TrackerApp({ profile, onBack, embedded = false }) {
               ))}
             </div>
             <div style={{ position: "relative" }}>
+              <span style={{ position: "absolute", left: 12, top: 20, transform: "translateY(-50%)", color: "#6a6c84", pointerEvents: "none", display: "flex" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.5" y2="16.5" /></svg>
+              </span>
               <input value={search}
                 onChange={e => { setSearch(e.target.value); setShowDrop(true); }}
                 onFocus={() => setShowDrop(true)}
                 placeholder="Search any food, brand, or restaurant…"
-                style={{ width: "100%", padding: "10px 12px", background: "#0d0d1a", border: "1px solid #2a2a40", borderRadius: 8, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 12 }} />
+                style={{ width: "100%", padding: "10px 12px 10px 34px", background: "#0d0d1a", border: "1px solid #3a3c52", borderRadius: 8, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 12 }} />
               {showDrop && (search.length > 1) && (
                 <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#262838", border: "1px solid #3a3c52", borderRadius: 8, zIndex: 100, maxHeight: 220, overflowY: "auto" }}>
                   {loading && <div style={{ padding: 14, fontSize: 11, color: "#a2a4bc", textAlign: "center" }}>Searching 3M+ foods…</div>}
                   {!loading && results.length === 0 && search.length > 1 && <div style={{ padding: 14, fontSize: 11, color: "#a2a4bc", textAlign: "center" }}>No results — try a different term</div>}
                   {results.map((f, i) => (
-                    <div key={i} onClick={() => addFood(f)} style={{ padding: "9px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", borderBottom: "1px solid #2c2d40", gap: 8 }}>
+                    <div key={i} className="ft-row" onClick={() => addFood(f)} style={{ padding: "9px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", borderBottom: "1px solid #2c2d40", gap: 8 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{f.name}</div>
                         <div style={{ fontSize: 10, color: "#a2a4bc", marginTop: 2 }}>P:{f.protein}g C:{f.carbs}g F:{f.fat}g per 100g</div>
@@ -429,7 +435,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
               </div>
               <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 8, overflow: "hidden", border: "1px solid #2c2d40" }}>
                 {g.items.map((e, i) => (
-                  <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderBottom: i < g.items.length - 1 ? "1px solid #1e1e30" : "none" }}>
+                  <div key={e.id} className="ft-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderBottom: i < g.items.length - 1 ? "1px solid #2c2d40" : "none" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, marginBottom: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{e.name}</div>
                       <div style={{ fontSize: 9, color: "#a2a4bc" }}>×{e.qty} · P:{Math.round(e.protein * e.qty)}g C:{Math.round(e.carbs * e.qty)}g F:{Math.round(e.fat * e.qty)}g</div>
@@ -641,7 +647,10 @@ export default function App() {
 
   if (view === "app") return (
     <>
-      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+        .ft-tab{transition:color .15s} .ft-tab:hover{color:#e8e8f0 !important}
+        .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
+        .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
       <TrackerApp profile={profile} onBack={() => setView("landing")} />
     </>
   );
