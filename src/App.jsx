@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import {
+  hasSupabase, getUser, onAuth, signUp, signIn, signOut,
+  loadProfile, saveProfile, loadEntries, addEntry, deleteEntry,
+  loadWeights, upsertWeight, deleteWeight, migrateLocal,
+} from "./cloud";
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
 const MC = { protein: "#FF6B6B", carbs: "#FFD93D", fat: "#6BCB77" };
@@ -256,7 +261,7 @@ function Onboarding({ onDone }) {
 }
 
 // ── TRACKER APP ──────────────────────────────────────────────────────────────
-function TrackerApp({ profile, onBack, embedded = false }) {
+function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout }) {
   const goal = calcGoal(profile);
   const storageKey = `ft_entries_${TODAY}`;
 
@@ -281,8 +286,21 @@ function TrackerApp({ profile, onBack, embedded = false }) {
     return () => clearTimeout(t);
   }, [entries]);
 
-  // Persist weight log
+  // Persist weight log (local cache)
   useEffect(() => { LS.set("ft_weight", weights); }, [weights]);
+
+  // When logged in, load this user's data from the cloud (source of truth)
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    (async () => {
+      const [e, w] = await Promise.all([loadEntries(userId, TODAY), loadWeights(userId)]);
+      if (!alive) return;
+      setEntries(e);
+      setWeights(w);
+    })();
+    return () => { alive = false; };
+  }, [userId]);
 
   // Debounced food search
   useEffect(() => {
@@ -303,12 +321,21 @@ function TrackerApp({ profile, onBack, embedded = false }) {
     fat: a.fat + e.fat * e.qty,
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
 
-  const addFood = (food) => {
-    setEntries(p => [...p, { ...food, meal: selectedMeal, qty: Number(qty), id: Date.now() }]);
+  const addFood = async (food) => {
+    const base = { ...food, meal: selectedMeal, qty: Number(qty) };
     setSearch(""); setResults([]); setShowDrop(false); setQty(1);
+    if (userId) {
+      const savedRow = await addEntry(userId, TODAY, base);
+      setEntries(p => [...p, savedRow || { ...base, id: Date.now() }]);
+    } else {
+      setEntries(p => [...p, { ...base, id: Date.now() }]);
+    }
   };
 
-  const removeEntry = (id) => setEntries(p => p.filter(e => e.id !== id));
+  const removeEntry = (id) => {
+    setEntries(p => p.filter(e => e.id !== id));
+    if (userId) deleteEntry(id);
+  };
   const mealGroups = MEALS.map(m => ({
     meal: m,
     items: entries.filter(e => e.meal === m),
@@ -332,8 +359,12 @@ function TrackerApp({ profile, onBack, embedded = false }) {
     if (!w || w <= 0) return;
     setWeights(prev => [...prev.filter(e => e.date !== TODAY), { date: TODAY, weight: w }]);
     setWeightInput("");
+    if (userId) upsertWeight(userId, TODAY, w);
   };
-  const removeWeight = (date) => setWeights(prev => prev.filter(e => e.date !== date));
+  const removeWeight = (date) => {
+    setWeights(prev => prev.filter(e => e.date !== date));
+    if (userId) deleteWeight(userId, date);
+  };
 
   return (
     <div style={{ background: "#14151f", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", ...(embedded ? { borderRadius: 16, overflow: "hidden", border: "1px solid #2c2d40", maxWidth: 420, margin: "0 auto" } : { minHeight: "100vh", maxWidth: 640, margin: "0 auto", borderLeft: "1px solid #2c2d40", borderRight: "1px solid #2c2d40" }) }}>
@@ -349,7 +380,8 @@ function TrackerApp({ profile, onBack, embedded = false }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {saved && <span style={{ fontSize: 10, color: "#C8F564", letterSpacing: 1 }}>✓ SAVED</span>}
           {profile && <div style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace" }}>{profile.name?.split(" ")[0]}</div>}
-          {!embedded && onBack && <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#666", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>← Exit</button>}
+          {!embedded && userId && onLogout && <button onClick={onLogout} style={{ background: "none", border: "1px solid #2a2a40", color: "#888", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>Log out</button>}
+          {!embedded && !userId && onBack && <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#666", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>← Exit</button>}
         </div>
       </div>
 
@@ -626,22 +658,124 @@ function FAQ() {
   );
 }
 
+// ── AUTH (LOGIN / SIGN UP) ───────────────────────────────────────────────────
+function Auth({ onAuthed }) {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+
+  const inputStyle = { width: "100%", padding: "13px 16px", background: "#0d0d1a", border: "1px solid #2a2a40", borderRadius: 10, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 14 };
+
+  const submit = async () => {
+    setError(""); setInfo("");
+    if (!email || !password) { setError("Enter your email and password."); return; }
+    if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    setBusy(true);
+    const { data, error } = await (mode === "signup" ? signUp : signIn)(email.trim(), password);
+    setBusy(false);
+    if (error) { setError(error.message); return; }
+    if (mode === "signup" && !data?.session) {
+      setInfo("Account created! Check your email to confirm, then log in.");
+      setMode("login");
+      return;
+    }
+    onAuthed();
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d0d1a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Mono',monospace" }}>
+      <div style={{ width: "100%", maxWidth: 380 }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28, color: "#C8F564" }}>FUEL</span>
+          <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28 }}> TRACKER</span>
+        </div>
+        <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 6, textAlign: "center", color: "#e8e8f0" }}>{mode === "signup" ? "Create your account" : "Welcome back"}</h2>
+        <p style={{ color: "#888", textAlign: "center", marginBottom: 24, fontSize: 12, lineHeight: 1.6 }}>{mode === "signup" ? "Start free — your data syncs across all your devices." : "Log in to access your tracker."}</p>
+
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" autoComplete="email" style={inputStyle} />
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} placeholder="Password" autoComplete={mode === "signup" ? "new-password" : "current-password"} style={{ ...inputStyle, marginTop: 10 }} />
+
+        {error && <div style={{ color: "#FF6B6B", fontSize: 12, marginTop: 12, textAlign: "center", lineHeight: 1.5 }}>{error}</div>}
+        {info && <div style={{ color: "#C8F564", fontSize: 12, marginTop: 12, textAlign: "center", lineHeight: 1.5 }}>{info}</div>}
+
+        <button onClick={submit} disabled={busy} style={{ width: "100%", marginTop: 18, padding: "14px 0", borderRadius: 12, border: "none", background: busy ? "#1e1e30" : "#C8F564", color: busy ? "#666" : "#0d0d1a", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, cursor: busy ? "default" : "pointer" }}>
+          {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Log in"}
+        </button>
+
+        <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "#888" }}>
+          {mode === "signup" ? "Already have an account? " : "New here? "}
+          <span onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(""); setInfo(""); }} style={{ color: "#C8F564", cursor: "pointer" }}>
+            {mode === "signup" ? "Log in" : "Create one"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── LANDING PAGE ──────────────────────────────────────────────────────────────
 export default function App() {
   const [view, setView] = useState("landing");
   const [profile, setProfile] = useState(() => LS.get("ft_profile", null));
+  const [user, setUser] = useState(null);
 
-  const handleStartTrial = () => {
-    if (profile) setView("app");
-    else setView("onboard");
+  // Resolve a logged-in user → load (or first-time migrate) their cloud profile
+  const resolveUser = async (u) => {
+    setUser(u);
+    if (!u) return null;
+    let prof = await loadProfile(u.id);
+    if (!prof && LS.get("ft_profile", null)) {
+      await migrateLocal(u.id);
+      prof = await loadProfile(u.id);
+    }
+    setProfile(prof);
+    return prof;
   };
 
+  // On load: restore any existing session; route to landing on sign-out
+  useEffect(() => {
+    if (!hasSupabase) return;
+    let unsub;
+    (async () => {
+      const u = await getUser();
+      if (u) await resolveUser(u);
+      unsub = onAuth((u2) => {
+        if (!u2) { setUser(null); setProfile(null); setView("landing"); }
+      });
+    })();
+    return () => unsub && unsub();
+  }, []);
+
+  const handleStartTrial = async () => {
+    if (!hasSupabase) { setView(profile ? "app" : "onboard"); return; }
+    const u = user || await getUser();
+    if (!u) { setView("auth"); return; }
+    const prof = profile || await resolveUser(u);
+    setView(prof ? "app" : "onboard");
+  };
+
+  const handleLogout = async () => { await signOut(); };
+
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  if (view === "auth") return (
+    <>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
+      <Auth onAuthed={async () => {
+        const u = await getUser();
+        const prof = await resolveUser(u);
+        setView(prof ? "app" : "onboard");
+      }} />
+    </>
+  );
 
   if (view === "onboard") return (
     <>
       <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
-      <Onboarding onDone={(p) => { setProfile(p); setView("app"); }} />
+      <Onboarding onDone={async (p) => { if (user) await saveProfile(user.id, p); setProfile(p); setView("app"); }} />
     </>
   );
 
@@ -651,7 +785,7 @@ export default function App() {
         .ft-tab{transition:color .15s} .ft-tab:hover{color:#e8e8f0 !important}
         .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
         .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
-      <TrackerApp profile={profile} onBack={() => setView("landing")} />
+      <TrackerApp profile={profile} userId={user?.id || null} onLogout={handleLogout} onBack={() => setView("landing")} />
     </>
   );
 
