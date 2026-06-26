@@ -333,9 +333,9 @@ function TrackerApp({ profile, onBack, embedded = false }) {
   const removeWeight = (date) => setWeights(prev => prev.filter(e => e.date !== date));
 
   return (
-    <div style={{ background: "#0d0d1a", ...(embedded ? { borderRadius: 16, overflow: "hidden", border: "1px solid #1e1e30", maxWidth: 420, margin: "0 auto" } : { minHeight: "100vh", maxWidth: 640, margin: "0 auto", borderLeft: "1px solid #1e1e30", borderRight: "1px solid #1e1e30" }) }}>
+    <div style={{ background: "#14151f", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", ...(embedded ? { borderRadius: 16, overflow: "hidden", border: "1px solid #2c2d40", maxWidth: 420, margin: "0 auto" } : { minHeight: "100vh", maxWidth: 640, margin: "0 auto", borderLeft: "1px solid #2c2d40", borderRight: "1px solid #2c2d40" }) }}>
       {/* Header */}
-      <div style={{ background: "linear-gradient(180deg,#13132a 0%,#0d0d1a 100%)", padding: "20px 20px 16px", borderBottom: "1px solid #1e1e30", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ background: "linear-gradient(180deg,#23253a 0%,#14151f 100%)", padding: "20px 20px 16px", borderBottom: "1px solid #2c2d40", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 2 }}>
             <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 800, letterSpacing: -1, color: "#C8F564" }}>FUEL</span>
@@ -351,9 +351,9 @@ function TrackerApp({ profile, onBack, embedded = false }) {
       </div>
 
       {/* Goal bar */}
-      <div style={{ padding: "10px 20px", background: "#0d0d1a", borderBottom: "1px solid #1a1a2e" }}>
+      <div style={{ padding: "10px 20px", background: "#14151f", borderBottom: "1px solid #2c2d40" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-          <span style={{ fontSize: 10, color: "#555", letterSpacing: 2 }}>DAILY GOAL</span>
+          <span style={{ fontSize: 10, color: "#8a8ca4", letterSpacing: 2 }}>DAILY GOAL</span>
           <span style={{ fontSize: 10, color: Math.round(totals.calories) > goal ? "#FF6B6B" : "#C8F564" }}>{Math.round(totals.calories)} / {goal} kcal</span>
         </div>
         <div style={{ height: 4, background: "#1a1a2e", borderRadius: 2, overflow: "hidden" }}>
@@ -362,11 +362,11 @@ function TrackerApp({ profile, onBack, embedded = false }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", borderBottom: "1px solid #1e1e30" }}>
+      <div style={{ display: "flex", borderBottom: "1px solid #2c2d40" }}>
         {["log", "summary", "weight"].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)} style={{
             flex: 1, padding: "12px 0", border: "none", background: "none", cursor: "pointer",
-            color: activeTab === tab ? "#C8F564" : "#444", fontFamily: "'DM Mono',monospace",
+            color: activeTab === tab ? "#C8F564" : "#9a9cb4", fontFamily: "'DM Mono',monospace",
             fontSize: 10, letterSpacing: 3, textTransform: "uppercase",
             borderBottom: activeTab === tab ? "2px solid #C8F564" : "2px solid transparent",
           }}>{tab}</button>
@@ -376,7 +376,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
       {activeTab === "log" && (
         <div style={{ padding: "16px 16px 0", maxHeight: embedded ? 480 : "none", overflowY: "auto" }}>
           {/* Add food */}
-          <div style={{ background: "#13132a", borderRadius: 10, padding: 14, marginBottom: 16, border: "1px solid #1e1e30" }}>
+          <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: 14, marginBottom: 16, border: "1px solid #2c2d40" }}>
             <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 10 }}>ADD FOOD — 3M+ FOODS</div>
             <div style={{ display: "flex", gap: 5, marginBottom: 10, flexWrap: "wrap" }}>
               {MEALS.map(m => (
@@ -396,14 +396,14 @@ function TrackerApp({ profile, onBack, embedded = false }) {
                 placeholder="Search any food, brand, or restaurant…"
                 style={{ width: "100%", padding: "10px 12px", background: "#0d0d1a", border: "1px solid #2a2a40", borderRadius: 8, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 12 }} />
               {showDrop && (search.length > 1) && (
-                <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#1a1a2e", border: "1px solid #2a2a40", borderRadius: 8, zIndex: 100, maxHeight: 220, overflowY: "auto" }}>
-                  {loading && <div style={{ padding: 14, fontSize: 11, color: "#555", textAlign: "center" }}>Searching 3M+ foods…</div>}
-                  {!loading && results.length === 0 && search.length > 1 && <div style={{ padding: 14, fontSize: 11, color: "#555", textAlign: "center" }}>No results — try a different term</div>}
+                <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, background: "#262838", border: "1px solid #3a3c52", borderRadius: 8, zIndex: 100, maxHeight: 220, overflowY: "auto" }}>
+                  {loading && <div style={{ padding: 14, fontSize: 11, color: "#a2a4bc", textAlign: "center" }}>Searching 3M+ foods…</div>}
+                  {!loading && results.length === 0 && search.length > 1 && <div style={{ padding: 14, fontSize: 11, color: "#a2a4bc", textAlign: "center" }}>No results — try a different term</div>}
                   {results.map((f, i) => (
-                    <div key={i} onClick={() => addFood(f)} style={{ padding: "9px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", borderBottom: "1px solid #1e1e30", gap: 8 }}>
+                    <div key={i} onClick={() => addFood(f)} style={{ padding: "9px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", borderBottom: "1px solid #2c2d40", gap: 8 }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{f.name}</div>
-                        <div style={{ fontSize: 10, color: "#555", marginTop: 2 }}>P:{f.protein}g C:{f.carbs}g F:{f.fat}g per 100g</div>
+                        <div style={{ fontSize: 10, color: "#a2a4bc", marginTop: 2 }}>P:{f.protein}g C:{f.carbs}g F:{f.fat}g per 100g</div>
                       </div>
                       <span style={{ color: "#C8F564", fontSize: 12, flexShrink: 0 }}>{f.calories} kcal</span>
                     </div>
@@ -427,12 +427,12 @@ function TrackerApp({ profile, onBack, embedded = false }) {
                 <span style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564" }}>{g.meal.toUpperCase()}</span>
                 <span style={{ fontSize: 10, color: "#888" }}>{Math.round(g.total)} kcal</span>
               </div>
-              <div style={{ background: "#13132a", borderRadius: 8, overflow: "hidden", border: "1px solid #1e1e30" }}>
+              <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 8, overflow: "hidden", border: "1px solid #2c2d40" }}>
                 {g.items.map((e, i) => (
                   <div key={e.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 12px", borderBottom: i < g.items.length - 1 ? "1px solid #1e1e30" : "none" }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, marginBottom: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{e.name}</div>
-                      <div style={{ fontSize: 9, color: "#555" }}>×{e.qty} · P:{Math.round(e.protein * e.qty)}g C:{Math.round(e.carbs * e.qty)}g F:{Math.round(e.fat * e.qty)}g</div>
+                      <div style={{ fontSize: 9, color: "#a2a4bc" }}>×{e.qty} · P:{Math.round(e.protein * e.qty)}g C:{Math.round(e.carbs * e.qty)}g F:{Math.round(e.fat * e.qty)}g</div>
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
                       <span style={{ color: "#C8F564", fontSize: 12 }}>{Math.round(e.calories * e.qty)}</span>
@@ -445,7 +445,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
           ))}
 
           {entries.length === 0 && (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "#2a2a40" }}>
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#6a6c84" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>🍽</div>
               <div style={{ fontSize: 10, letterSpacing: 2 }}>SEARCH FOR A FOOD TO GET STARTED</div>
             </div>
@@ -459,20 +459,20 @@ function TrackerApp({ profile, onBack, embedded = false }) {
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
             <RingChart consumed={Math.round(totals.calories)} goal={goal} />
           </div>
-          <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginBottom: 12 }}>
+          <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: 16, border: "1px solid #2c2d40", marginBottom: 12 }}>
             <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 12 }}>MACROS</div>
             <MacroBar protein={totals.protein} carbs={totals.carbs} fat={totals.fat} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {[["Protein", Math.round(totals.protein) + "g", MC.protein], ["Carbs", Math.round(totals.carbs) + "g", MC.carbs], ["Fat", Math.round(totals.fat) + "g", MC.fat], ["Remaining", Math.max(0, goal - Math.round(totals.calories)) + " kcal", "#C8F564"]].map(([label, val, color]) => (
-              <div key={label} style={{ background: "#13132a", borderRadius: 8, padding: "12px 14px", border: "1px solid #1e1e30" }}>
-                <div style={{ fontSize: 9, color: "#555", letterSpacing: 2, marginBottom: 4 }}>{label.toUpperCase()}</div>
+              <div key={label} style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 8, padding: "12px 14px", border: "1px solid #2c2d40" }}>
+                <div style={{ fontSize: 9, color: "#8a8ca4", letterSpacing: 2, marginBottom: 4 }}>{label.toUpperCase()}</div>
                 <div style={{ fontSize: 20, fontFamily: "'Syne',sans-serif", fontWeight: 800, color }}>{val}</div>
               </div>
             ))}
           </div>
           {mealGroups.some(g => g.items.length > 0) && (
-            <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginTop: 10 }}>
+            <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: 16, border: "1px solid #2c2d40", marginTop: 10 }}>
               <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 14 }}>MEAL BREAKDOWN</div>
               {mealGroups.filter(g => g.items.length > 0).map(g => (
                 <div key={g.meal} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -491,7 +491,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
       {activeTab === "weight" && (
         <div style={{ padding: "20px 16px" }}>
           {/* Log today's weight */}
-          <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginBottom: 12 }}>
+          <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: 16, border: "1px solid #2c2d40", marginBottom: 12 }}>
             <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 12 }}>{todayWeight ? "UPDATE TODAY'S WEIGHT" : "LOG TODAY'S WEIGHT"}</div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input type="number" value={weightInput} onChange={e => setWeightInput(e.target.value)}
@@ -507,7 +507,7 @@ function TrackerApp({ profile, onBack, embedded = false }) {
           </div>
 
           {sortedWeights.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "#2a2a40" }}>
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#6a6c84" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>📉</div>
               <div style={{ fontSize: 10, letterSpacing: 2 }}>LOG YOUR WEIGHT TO SEE PROGRESS</div>
             </div>
@@ -515,19 +515,19 @@ function TrackerApp({ profile, onBack, embedded = false }) {
             <>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 12 }}>
                 {[["Current", current.toFixed(1) + " kg", "#C8F564"], ["Start", start.toFixed(1) + " kg", "#888"], ["Change", (change > 0 ? "+" : "") + change.toFixed(1) + " kg", changeColor]].map(([label, val, color]) => (
-                  <div key={label} style={{ background: "#13132a", borderRadius: 8, padding: "12px 10px", border: "1px solid #1e1e30", textAlign: "center" }}>
-                    <div style={{ fontSize: 9, color: "#555", letterSpacing: 2, marginBottom: 4 }}>{label.toUpperCase()}</div>
+                  <div key={label} style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 8, padding: "12px 10px", border: "1px solid #2c2d40", textAlign: "center" }}>
+                    <div style={{ fontSize: 9, color: "#8a8ca4", letterSpacing: 2, marginBottom: 4 }}>{label.toUpperCase()}</div>
                     <div style={{ fontSize: 17, fontFamily: "'Syne',sans-serif", fontWeight: 800, color }}>{val}</div>
                   </div>
                 ))}
               </div>
 
-              <div style={{ background: "#13132a", borderRadius: 10, padding: 16, border: "1px solid #1e1e30", marginBottom: 12 }}>
+              <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: 16, border: "1px solid #2c2d40", marginBottom: 12 }}>
                 <div style={{ fontSize: 9, letterSpacing: 3, color: "#C8F564", marginBottom: 12 }}>PROGRESS</div>
                 <WeightChart data={sortedWeights} />
               </div>
 
-              <div style={{ background: "#13132a", borderRadius: 10, padding: "8px 0", border: "1px solid #1e1e30" }}>
+              <div style={{ background: "#1f2130", boxShadow: "0 4px 14px rgba(0,0,0,.4)", borderRadius: 10, padding: "8px 0", border: "1px solid #2c2d40" }}>
                 {[...sortedWeights].reverse().map((e, i, arr) => (
                   <div key={e.date} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 16px", borderBottom: i < arr.length - 1 ? "1px solid #1e1e30" : "none" }}>
                     <span style={{ fontSize: 11, color: "#888", fontFamily: "'DM Mono',monospace" }}>{fmtShort(e.date)}{e.date === TODAY ? " · Today" : ""}</span>
