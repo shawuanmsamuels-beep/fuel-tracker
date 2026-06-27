@@ -86,7 +86,39 @@ choice (hosted auth + Postgres database, generous free tier).
 
 ---
 
-# Phase 2 — Payments (later, after Phase 1)
+# Phase 2 — Payments (in progress)
+
+## CURRENT STATUS (resume here)
+- ✅ **Stage 2a (trial + gating) — DONE & live.** `accessInfo()` in `src/cloud.js`;
+  Paywall + "trial days left" banner in `src/App.jsx`. Columns `subscription_status`
+  (default 'trialing') and `trial_ends_at` (default now()+7 days) added to `profiles`.
+- ✅ **Stage 2b code — BUILT & deployed, but INERT until Netlify env vars are set.**
+  - `netlify/functions/create-checkout.js` (opens Stripe Checkout)
+  - `netlify/functions/stripe-webhook.js` (verifies events → updates `subscription_status` via Supabase service key)
+  - Paywall "Subscribe" button calls create-checkout; app re-checks status on `?checkout=success`.
+  - `netlify.toml` has functions dir + Node 20; `stripe` is a dependency.
+- ✅ Privacy Policy + Terms of Service pages added (footer links).
+- ⛔ **BLOCKED:** owner is locked out of Stripe (2FA reset in progress, ~12h). Stage 2b
+  finishes once they're back in.
+
+## Remaining steps to finish Stage 2b (when Stripe is accessible)
+1. **Supabase SQL:** `alter table public.profiles add column if not exists stripe_customer_id text;`
+2. **Stripe (TEST mode):** create a $9.99/month recurring Price → copy the **price_… ID**;
+   copy the **sk_test_… secret key**.
+3. **Supabase:** copy the **service key** (sb_secret_… / service_role) for the webhook.
+4. **Netlify env vars** (Site config → Environment variables — include a VALUE!):
+   `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `SUPABASE_URL` (https://wgnkqonwclypjpfrcgzu.supabase.co),
+   `SUPABASE_SERVICE_ROLE_KEY`. Then **trigger a redeploy**.
+5. **Stripe webhook:** add endpoint `https://fueltracker-app.netlify.app/.netlify/functions/stripe-webhook`,
+   events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+   Copy the **whsec_… signing secret** → add as Netlify env var `STRIPE_WEBHOOK_SECRET` → redeploy.
+6. **Test:** set a profile's `trial_ends_at` to the past → reload → Paywall → Subscribe →
+   test card `4242 4242 4242 4242` (any future date/CVC/zip) → returns → unlocks (status 'active').
+   Then cancel the sub in Stripe → webhook → status 'canceled' → app locks.
+
+---
+
+## Original Phase 2 notes
 
 **DECISION (owner, leaning):** go with **Option B — full subscription gating.**
 The owner wants a canceled subscription to **restrict access** to the app.
