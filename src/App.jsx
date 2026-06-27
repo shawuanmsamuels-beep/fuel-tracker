@@ -771,6 +771,64 @@ function Paywall({ reason, onLogout, userId, email }) {
   );
 }
 
+// ── LEGAL PAGES (Privacy Policy / Terms of Service) ──────────────────────────
+// Starting templates describing what Fuel Tracker actually does with data.
+// Review with a professional and fill in the [bracketed] details before launch.
+const LEGAL = {
+  privacy: {
+    title: "Privacy Policy",
+    updated: "Last updated: June 27, 2026",
+    sections: [
+      ["", "This Privacy Policy explains how Fuel Tracker (\"we\", \"us\") collects, uses, and protects your information when you use our app. By using Fuel Tracker, you agree to this policy."],
+      ["Information we collect", "• Account: your email address.\n• Profile: name, age, sex, height, weight, and goal (used to calculate your calorie target).\n• Activity: the foods and weights you log.\n• Payment: handled entirely by Stripe — we never see or store your card numbers.\n• Technical: limited browser storage to keep you signed in and cache your data."],
+      ["How we use your information", "To provide and operate the app, calculate your personalized calorie goal, sync your data across your devices, manage your subscription, and respond to support requests."],
+      ["How your data is stored and protected", "Your data is stored with Supabase and protected by row-level security, so only your account can access your information. Data is transmitted over encrypted HTTPS connections."],
+      ["Service providers", "We rely on trusted providers to run Fuel Tracker: Supabase (database and login), Stripe (payments), Netlify (hosting), and Open Food Facts (food database). We share only the information needed for these services to function."],
+      ["We do not sell your data", "We do not sell or rent your personal information to anyone."],
+      ["Your choices and rights", "You can view and update your profile in the app, cancel your subscription at any time, and request deletion of your account and data by emailing us at the address below."],
+      ["Data retention", "We keep your data while your account is active. If you request deletion, we remove your personal data from our systems."],
+      ["Children", "Fuel Tracker is not intended for anyone under 16 years of age."],
+      ["Changes to this policy", "We may update this policy from time to time. Material changes will be reflected by the \"last updated\" date above."],
+      ["Contact us", "Questions about your privacy? Email support@fueltracker.app.  [Replace with your real contact email and add your business name before launch.]"],
+    ],
+  },
+  terms: {
+    title: "Terms of Service",
+    updated: "Last updated: June 27, 2026",
+    sections: [
+      ["", "These Terms govern your use of Fuel Tracker. By creating an account or using the app, you agree to these Terms."],
+      ["The service", "Fuel Tracker is a calorie and macro tracking app. Food information is provided by the Open Food Facts community database and may sometimes be incomplete or inaccurate."],
+      ["Not medical advice", "Fuel Tracker is for general informational and wellness purposes only. It is not medical, nutritional, or health advice and is not a substitute for professional guidance. Consult a qualified healthcare provider before making changes to your diet, exercise, or health."],
+      ["Your account", "You are responsible for keeping your login secure and for the information you provide. Please provide accurate details so your calorie goal is meaningful."],
+      ["Subscriptions and billing", "Fuel Tracker offers a 7-day free trial. After the trial, continued access requires a paid subscription ($9.99/month, or annual pricing where offered). Subscriptions renew automatically until canceled. You can cancel anytime, and we offer a 30-day money-back guarantee on your first charge. Payments are processed securely by Stripe."],
+      ["Acceptable use", "Don't misuse the service, attempt to disrupt it, or access other users' data."],
+      ["Disclaimer", "The service is provided \"as is\" without warranties of any kind. We do not guarantee the accuracy of food data or that the app will be uninterrupted or error-free."],
+      ["Limitation of liability", "To the fullest extent permitted by law, Fuel Tracker is not liable for any indirect or consequential damages arising from your use of the app."],
+      ["Changes to these terms", "We may update these Terms from time to time. Continued use after changes means you accept the updated Terms."],
+      ["Contact", "Questions? Email support@fueltracker.app.  [Replace with your real contact details and governing-law/jurisdiction before launch.]"],
+    ],
+  },
+};
+
+function Legal({ doc, onBack }) {
+  const d = LEGAL[doc];
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d0d1a", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", padding: "40px 20px" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#888", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 11, marginBottom: 28 }}>← Back</button>
+        <h1 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 32, marginBottom: 6 }}>{d.title}</h1>
+        <div style={{ color: "#555", fontSize: 11, letterSpacing: 1, marginBottom: 32 }}>{d.updated}</div>
+        {d.sections.map(([h, body], i) => (
+          <div key={i} style={{ marginBottom: 22 }}>
+            {h && <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16, color: "#C8F564", marginBottom: 8 }}>{h}</h2>}
+            <p style={{ color: "#aaa", fontSize: 13, lineHeight: 1.8, whiteSpace: "pre-line" }}>{body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── LANDING PAGE ──────────────────────────────────────────────────────────────
 export default function App() {
   const [view, setView] = useState("landing");
@@ -827,6 +885,13 @@ export default function App() {
   const handleLogout = async () => { await signOut(); };
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  if (view === "privacy" || view === "terms") return (
+    <>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
+      <Legal doc={view} onBack={() => setView("landing")} />
+    </>
+  );
 
   if (view === "auth") return (
     <>
@@ -1064,9 +1129,9 @@ export default function App() {
           <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800 }}>TRACKER</span>
         </div>
         <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-          {[["Privacy Policy", "#"], ["Terms of Service", "#"], ["Support", "mailto:support@fueltracker.app"]].map(([label, href]) => (
-            <a key={label} href={href} style={{ color: "#444", fontSize: 11, textDecoration: "none", letterSpacing: 1 }}>{label}</a>
-          ))}
+          <button onClick={() => { setView("privacy"); window.scrollTo(0, 0); }} style={{ background: "none", border: "none", color: "#888", fontSize: 11, letterSpacing: 1, cursor: "pointer", fontFamily: "'DM Mono',monospace", padding: 0 }}>Privacy Policy</button>
+          <button onClick={() => { setView("terms"); window.scrollTo(0, 0); }} style={{ background: "none", border: "none", color: "#888", fontSize: 11, letterSpacing: 1, cursor: "pointer", fontFamily: "'DM Mono',monospace", padding: 0 }}>Terms of Service</button>
+          <a href="mailto:support@fueltracker.app" style={{ color: "#888", fontSize: 11, textDecoration: "none", letterSpacing: 1 }}>Support</a>
         </div>
         <div style={{ color: "#333", fontSize: 11 }}>© 2026 Fuel Tracker. All rights reserved.</div>
       </footer>
