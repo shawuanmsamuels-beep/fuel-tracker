@@ -273,7 +273,7 @@ function Onboarding({ onDone }) {
 }
 
 // ── TRACKER APP ──────────────────────────────────────────────────────────────
-function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout }) {
+function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout, onOpenSettings }) {
   const goal = calcGoal(profile);
   const storageKey = `ft_entries_${TODAY}`;
 
@@ -391,7 +391,9 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {saved && <span style={{ fontSize: 10, color: "#C8F564", letterSpacing: 1 }}>✓ SAVED</span>}
-          {profile && <div style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace" }}>{profile.name?.split(" ")[0]}</div>}
+          {profile && (onOpenSettings && !embedded
+            ? <button onClick={onOpenSettings} title="Account settings" style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace", cursor: "pointer" }}>{profile.name?.split(" ")[0]} ⚙</button>
+            : <div style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace" }}>{profile.name?.split(" ")[0]}</div>)}
           {!embedded && userId && onLogout && <button onClick={onLogout} style={{ background: "none", border: "1px solid #2a2a40", color: "#888", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>Log out</button>}
           {!embedded && !userId && onBack && <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#666", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>← Exit</button>}
         </div>
@@ -829,6 +831,68 @@ function Legal({ doc, onBack }) {
   );
 }
 
+// ── ACCOUNT SETTINGS (edit profile) ──────────────────────────────────────────
+function Settings({ profile, onSave, onBack }) {
+  const [form, setForm] = useState({
+    name: profile?.name || "", age: profile?.age || "", sex: profile?.sex || "male",
+    weight: profile?.weight || "", height: profile?.height || "", goal: profile?.goal || "lose",
+  });
+  const [busy, setBusy] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const valid = form.name.trim() && form.age && form.weight && form.height;
+  const newGoal = calcGoal(form);
+  const input = { width: "100%", padding: "12px 14px", background: "#13132a", border: "1px solid #2a2a40", borderRadius: 10, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 14 };
+  const lbl = { fontSize: 10, color: "#888", letterSpacing: 2, marginBottom: 6, display: "block", marginTop: 16 };
+
+  const save = async () => { if (!valid) return; setBusy(true); await onSave(form); setBusy(false); };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d0d1a", color: "#e8e8f0", fontFamily: "'DM Mono',monospace", padding: "40px 20px" }}>
+      <div style={{ maxWidth: 440, margin: "0 auto" }}>
+        <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#888", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 11, marginBottom: 24 }}>← Back</button>
+        <h1 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 6 }}>Account Settings</h1>
+        <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>Update your details — your daily calorie goal recalculates automatically.</p>
+
+        <label style={lbl}>NAME</label>
+        <input value={form.name} onChange={e => set("name", e.target.value)} style={input} />
+
+        <label style={lbl}>SEX</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          {["male", "female"].map(s => (
+            <button key={s} onClick={() => set("sex", s)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "2px solid", borderColor: form.sex === s ? "#C8F564" : "#2a2a40", background: form.sex === s ? "#C8F56415" : "#13132a", color: form.sex === s ? "#C8F564" : "#888", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12, textTransform: "capitalize" }}>{s}</button>
+          ))}
+        </div>
+
+        {[["AGE", "age", "years"], ["WEIGHT", "weight", "kg"], ["HEIGHT", "height", "cm"]].map(([label, key, unit]) => (
+          <div key={key}>
+            <label style={lbl}>{label}</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <input type="number" value={form[key]} onChange={e => set(key, e.target.value)} style={input} />
+              <span style={{ color: "#555", fontSize: 12, width: 34 }}>{unit}</span>
+            </div>
+          </div>
+        ))}
+
+        <label style={lbl}>GOAL</label>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {[["lose", "🔥 Lose Weight"], ["maintain", "⚖️ Stay the Same"], ["gain", "💪 Build Muscle"]].map(([val, label]) => (
+            <button key={val} onClick={() => set("goal", val)} style={{ padding: "12px 16px", borderRadius: 10, border: "2px solid", textAlign: "left", borderColor: form.goal === val ? "#C8F564" : "#2a2a40", background: form.goal === val ? "#C8F56415" : "#13132a", cursor: "pointer", color: "#e8e8f0", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 14 }}>{label}</button>
+          ))}
+        </div>
+
+        <div style={{ background: "#13132a", border: "1px solid #2a2a40", borderRadius: 10, padding: "14px 16px", marginTop: 20, textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: "#888", letterSpacing: 2, marginBottom: 4 }}>NEW DAILY GOAL</div>
+          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, color: "#C8F564" }}>{newGoal} kcal</div>
+        </div>
+
+        <button onClick={save} disabled={!valid || busy} style={{ width: "100%", marginTop: 18, padding: "15px 0", borderRadius: 12, border: "none", background: valid && !busy ? "#C8F564" : "#1e1e30", color: valid && !busy ? "#0d0d1a" : "#666", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, cursor: valid && !busy ? "pointer" : "default" }}>
+          {busy ? "Saving…" : "Save changes"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── LANDING PAGE ──────────────────────────────────────────────────────────────
 export default function App() {
   const [view, setView] = useState("landing");
@@ -911,6 +975,13 @@ export default function App() {
     </>
   );
 
+  if (view === "settings") return (
+    <>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}`}</style>
+      <Settings profile={profile} onBack={() => setView("app")} onSave={async (p) => { LS.set("ft_profile", p); if (user) await saveProfile(user.id, p); setProfile(p); setView("app"); }} />
+    </>
+  );
+
   if (view === "app") {
     const access = hasSupabase ? accessInfo(profile) : { allowed: true };
     return (
@@ -928,7 +999,7 @@ export default function App() {
                 ⭐ Free trial — {access.daysLeft} day{access.daysLeft === 1 ? "" : "s"} left
               </div>
             )}
-            <TrackerApp profile={profile} userId={user?.id || null} onLogout={handleLogout} onBack={() => setView("landing")} />
+            <TrackerApp profile={profile} userId={user?.id || null} onLogout={handleLogout} onBack={() => setView("landing")} onOpenSettings={() => setView("settings")} />
           </>
         )}
       </>
