@@ -729,10 +729,27 @@ function Auth({ onAuthed }) {
 }
 
 // ── PAYWALL (trial ended / subscription needed) ──────────────────────────────
-function Paywall({ reason, onLogout }) {
+function Paywall({ reason, onLogout, userId, email }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
   const title = reason === "canceled" ? "Your subscription ended"
     : reason === "trial_expired" ? "Your free trial has ended"
     : "Subscribe to continue";
+
+  const subscribe = async () => {
+    setBusy(true); setErr("");
+    try {
+      const res = await fetch("/.netlify/functions/create-checkout", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, email }),
+      });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; return; }
+      setErr(data.error || "Could not start checkout. Please try again.");
+    } catch { setErr("Could not start checkout. Please try again."); }
+    setBusy(false);
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: "#0d0d1a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Mono',monospace", textAlign: "center" }}>
       <div style={{ width: "100%", maxWidth: 420 }}>
@@ -743,10 +760,10 @@ function Paywall({ reason, onLogout }) {
         <div style={{ fontSize: 42, marginBottom: 12 }}>🔒</div>
         <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, color: "#e8e8f0", marginBottom: 10 }}>{title}</h2>
         <p style={{ color: "#888", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Your data is safe and waiting. Subscribe to keep tracking — cancel anytime.</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 18 }}>
-          <a href="https://buy.stripe.com/28E3cw5Jy9kUbWo49G28802" target="_blank" rel="noopener noreferrer" style={{ display: "block", padding: "15px 0", borderRadius: 12, background: "#C8F564", color: "#0d0d1a", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, textDecoration: "none" }}>Subscribe — $9.99 / month</a>
-          <a href="https://buy.stripe.com/8x2cN67RG40AbWo7lS28803" target="_blank" rel="noopener noreferrer" style={{ display: "block", padding: "14px 0", borderRadius: 12, background: "transparent", color: "#e8e8f0", border: "1px solid #2a2a40", fontFamily: "'DM Mono',monospace", fontSize: 13, textDecoration: "none" }}>Or save 34% — $79 / year</a>
-        </div>
+        <button onClick={subscribe} disabled={busy} style={{ width: "100%", padding: "15px 0", borderRadius: 12, border: "none", background: busy ? "#1e1e30" : "#C8F564", color: busy ? "#666" : "#0d0d1a", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, cursor: busy ? "default" : "pointer", marginBottom: 12 }}>
+          {busy ? "Opening secure checkout…" : "Subscribe — $9.99 / month"}
+        </button>
+        {err && <div style={{ color: "#FF6B6B", fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>{err}</div>}
         <div style={{ fontSize: 11, color: "#555", marginBottom: 18 }}>🛡️ 30-day money-back guarantee · Secure checkout by Stripe</div>
         <button onClick={onLogout} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>Log out</button>
       </div>
@@ -780,6 +797,18 @@ export default function App() {
     (async () => {
       const u = await getUser();
       if (u) await resolveUser(u);
+      // Returning from Stripe Checkout? The webhook may lag a second — re-check status.
+      const params = new URLSearchParams(window.location.search);
+      if (u && params.get("checkout") === "success") {
+        setView("app");
+        for (let i = 0; i < 4; i++) {
+          await new Promise(r => setTimeout(r, 1500));
+          const prof = await loadProfile(u.id);
+          setProfile(prof);
+          if (prof && prof.subscription_status === "active") break;
+        }
+        window.history.replaceState({}, "", window.location.pathname);
+      }
       unsub = onAuth((u2) => {
         if (!u2) { setUser(null); setProfile(null); setView("landing"); }
       });
@@ -826,7 +855,7 @@ export default function App() {
           .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
           .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
         {!access.allowed ? (
-          <Paywall reason={access.reason} onLogout={handleLogout} />
+          <Paywall reason={access.reason} onLogout={handleLogout} userId={user?.id} email={user?.email} />
         ) : (
           <>
             {access.reason === "trial" && typeof access.daysLeft === "number" && (
