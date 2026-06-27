@@ -30,6 +30,14 @@
 - ✅ Cleanup: removed corrupted `src/index.html`, duplicate `src/vite.config.js`, unused `useCallback`, redundant font `@import`s.
 - ✅ Brightened tracker: softer dark background (`#14151f`), lighter cards (`#1f2130`), explicit light text so food names are readable, brighter tabs/labels, soft card shadows, lighter search dropdown.
 - ✅ Search icon + hover highlights (`.ft-tab` / `.ft-row` / `.ft-item` CSS in the app-view `<style>`), and popularity-sorted/de-duped food search.
+- ✅ **Phase 1 COMPLETE (live & verified):** Supabase accounts + cloud sync. Signup/login,
+  cloud-stored profile/entries/weights, one-time local→cloud migration, log-out button.
+  Verified: entry persists across logout→login. Supabase **Site URL** set to the
+  Netlify URL. Supabase publishable URL+key are baked into `src/supabase.js` (public-safe,
+  RLS-protected), so no Netlify env vars are needed.
+  NOTE: email confirmation is still **ON** in Supabase (new users must click the
+  confirmation email — which now correctly opens the live app). Can be turned off in
+  Authentication → Providers → Email if instant signup is preferred.
 
 ## Known follow-ups / quality ideas
 - Food search is the **free** Open Food Facts DB — still imperfect for very generic terms.

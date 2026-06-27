@@ -54,26 +54,38 @@ function calcGoal(profile) {
 }
 
 // ── OPEN FOOD FACTS API ──────────────────────────────────────────────────────
+async function fetchOFF(query) {
+  const res = await fetch(
+    `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&fields=product_name,nutriments,brands,serving_size`
+  );
+  const data = await res.json();
+  const seen = new Set();
+  return (data.products || [])
+    .filter(p => p.product_name && p.nutriments?.["energy-kcal_100g"] > 0)
+    .map(p => ({
+      name: [p.brands, p.product_name].filter(Boolean).join(" — ").trim().slice(0, 60),
+      calories: Math.round(p.nutriments["energy-kcal_100g"] || 0),
+      protein: Math.round((p.nutriments["proteins_100g"] || 0) * 10) / 10,
+      carbs: Math.round((p.nutriments["carbohydrates_100g"] || 0) * 10) / 10,
+      fat: Math.round((p.nutriments["fat_100g"] || 0) * 10) / 10,
+      serving: p.serving_size || "100g",
+    }))
+    .filter(p => { const k = p.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; });
+}
+
 async function searchFoods(query) {
-  if (!query || query.length < 2) return [];
+  const q = (query || "").trim();
+  if (q.length < 2) return [];
   try {
-    const res = await fetch(
-      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=40&sort_by=unique_scans_n&fields=product_name,nutriments,brands,serving_size`
-    );
-    const data = await res.json();
-    const seen = new Set();
-    return (data.products || [])
-      .filter(p => p.product_name && p.nutriments?.["energy-kcal_100g"] > 0)
-      .map(p => ({
-        name: [p.brands, p.product_name].filter(Boolean).join(" — ").trim().slice(0, 60),
-        calories: Math.round(p.nutriments["energy-kcal_100g"] || 0),
-        protein: Math.round((p.nutriments["proteins_100g"] || 0) * 10) / 10,
-        carbs: Math.round((p.nutriments["carbohydrates_100g"] || 0) * 10) / 10,
-        fat: Math.round((p.nutriments["fat_100g"] || 0) * 10) / 10,
-        serving: p.serving_size || "100g",
-      }))
-      .filter(p => { const k = p.name.toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; })
-      .slice(0, 15);
+    let results = await fetchOFF(q);
+    // If a plural term comes back empty, retry with the singular (e.g. "eggs" → "egg")
+    if (results.length === 0 && q.length > 3 && q.toLowerCase().endsWith("s")) {
+      results = await fetchOFF(q.slice(0, -1));
+    }
+    // Float results whose name actually contains the search term to the top
+    const ql = q.toLowerCase();
+    results.sort((a, b) => Number(b.name.toLowerCase().includes(ql)) - Number(a.name.toLowerCase().includes(ql)));
+    return results.slice(0, 15);
   } catch { return []; }
 }
 
