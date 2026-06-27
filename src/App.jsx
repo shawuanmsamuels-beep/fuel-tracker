@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
   hasSupabase, getUser, onAuth, signUp, signIn, signOut,
   loadProfile, saveProfile, loadEntries, addEntry, deleteEntry,
-  loadWeights, upsertWeight, deleteWeight, migrateLocal,
+  loadWeights, upsertWeight, deleteWeight, migrateLocal, accessInfo,
 } from "./cloud";
 
 // ── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -728,6 +728,32 @@ function Auth({ onAuthed }) {
   );
 }
 
+// ── PAYWALL (trial ended / subscription needed) ──────────────────────────────
+function Paywall({ reason, onLogout }) {
+  const title = reason === "canceled" ? "Your subscription ended"
+    : reason === "trial_expired" ? "Your free trial has ended"
+    : "Subscribe to continue";
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d0d1a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'DM Mono',monospace", textAlign: "center" }}>
+      <div style={{ width: "100%", maxWidth: 420 }}>
+        <div style={{ marginBottom: 20 }}>
+          <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26, color: "#C8F564" }}>FUEL</span>
+          <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 26 }}> TRACKER</span>
+        </div>
+        <div style={{ fontSize: 42, marginBottom: 12 }}>🔒</div>
+        <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, color: "#e8e8f0", marginBottom: 10 }}>{title}</h2>
+        <p style={{ color: "#888", fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>Your data is safe and waiting. Subscribe to keep tracking — cancel anytime.</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 18 }}>
+          <a href="https://buy.stripe.com/28E3cw5Jy9kUbWo49G28802" target="_blank" rel="noopener noreferrer" style={{ display: "block", padding: "15px 0", borderRadius: 12, background: "#C8F564", color: "#0d0d1a", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, textDecoration: "none" }}>Subscribe — $9.99 / month</a>
+          <a href="https://buy.stripe.com/8x2cN67RG40AbWo7lS28803" target="_blank" rel="noopener noreferrer" style={{ display: "block", padding: "14px 0", borderRadius: 12, background: "transparent", color: "#e8e8f0", border: "1px solid #2a2a40", fontFamily: "'DM Mono',monospace", fontSize: 13, textDecoration: "none" }}>Or save 34% — $79 / year</a>
+        </div>
+        <div style={{ fontSize: 11, color: "#555", marginBottom: 18 }}>🛡️ 30-day money-back guarantee · Secure checkout by Stripe</div>
+        <button onClick={onLogout} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>Log out</button>
+      </div>
+    </div>
+  );
+}
+
 // ── LANDING PAGE ──────────────────────────────────────────────────────────────
 export default function App() {
   const [view, setView] = useState("landing");
@@ -791,15 +817,29 @@ export default function App() {
     </>
   );
 
-  if (view === "app") return (
-    <>
-      <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
-        .ft-tab{transition:color .15s} .ft-tab:hover{color:#e8e8f0 !important}
-        .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
-        .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
-      <TrackerApp profile={profile} userId={user?.id || null} onLogout={handleLogout} onBack={() => setView("landing")} />
-    </>
-  );
+  if (view === "app") {
+    const access = hasSupabase ? accessInfo(profile) : { allowed: true };
+    return (
+      <>
+        <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+          .ft-tab{transition:color .15s} .ft-tab:hover{color:#e8e8f0 !important}
+          .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
+          .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
+        {!access.allowed ? (
+          <Paywall reason={access.reason} onLogout={handleLogout} />
+        ) : (
+          <>
+            {access.reason === "trial" && typeof access.daysLeft === "number" && (
+              <div style={{ background: "#C8F56415", borderBottom: "1px solid #C8F56330", color: "#C8F564", textAlign: "center", padding: "8px 12px", fontFamily: "'DM Mono',monospace", fontSize: 11, letterSpacing: 1 }}>
+                ⭐ Free trial — {access.daysLeft} day{access.daysLeft === 1 ? "" : "s"} left
+              </div>
+            )}
+            <TrackerApp profile={profile} userId={user?.id || null} onLogout={handleLogout} onBack={() => setView("landing")} />
+          </>
+        )}
+      </>
+    );
+  }
 
   // LANDING
   return (

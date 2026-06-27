@@ -37,7 +37,23 @@ export async function signOut() {
 export async function loadProfile(userId) {
   const { data, error } = await supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle();
   if (error || !data) return null;
-  return { name: data.name, age: data.age, sex: data.sex, weight: data.weight, height: data.height, goal: data.goal };
+  return {
+    name: data.name, age: data.age, sex: data.sex, weight: data.weight, height: data.height, goal: data.goal,
+    subscription_status: data.subscription_status, trial_ends_at: data.trial_ends_at,
+  };
+}
+
+// Works out whether a profile may use the app (active sub, or trial not expired).
+// If the subscription columns don't exist yet, it allows access (nothing to enforce).
+export function accessInfo(profile) {
+  if (!profile) return { allowed: false, reason: "none" };
+  if (profile.subscription_status === "active") return { allowed: true, reason: "active" };
+  if (!profile.trial_ends_at) return { allowed: true, reason: "trial" }; // columns not set up yet
+  const msLeft = new Date(profile.trial_ends_at).getTime() - Date.now();
+  if (profile.subscription_status !== "canceled" && msLeft > 0) {
+    return { allowed: true, reason: "trial", daysLeft: Math.ceil(msLeft / 86400000) };
+  }
+  return { allowed: false, reason: profile.subscription_status === "canceled" ? "canceled" : "trial_expired" };
 }
 export async function saveProfile(userId, p) {
   return supabase.from("profiles").upsert({
