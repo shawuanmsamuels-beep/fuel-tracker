@@ -24,25 +24,44 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: `Signature verification failed: ${err.message}` };
   }
 
-  const supabase = createClient(supaUrl, serviceKey);
+  // Guard against a misconfigured SUPABASE_URL (a common copy/paste mistake).
+  // createClient throws if the URL is malformed — catch it so we return a clear
+  // message instead of a cryptic 502 crash.
+  if (!/^https:\/\/.+\.supabase\.co\/?$/.test(supaUrl)) {
+    return { statusCode: 500, body: `Bad SUPABASE_URL (should look like https://xxxx.supabase.co): "${supaUrl}"` };
+  }
+
+  let supabase;
+  try {
+    supabase = createClient(supaUrl, serviceKey);
+  } catch (e) {
+    return { statusCode: 500, body: `Could not connect to Supabase: ${e.message}` };
+  }
+
+  // Each helper returns Supabase's { error } so we can surface DB failures clearly.
   const byUser = (userId, fields) => supabase.from("profiles").update(fields).eq("user_id", userId);
   const byCustomer = (customerId, fields) => supabase.from("profiles").update(fields).eq("stripe_customer_id", customerId);
 
   try {
+    let result;
     if (evt.type === "checkout.session.completed") {
       const s = evt.data.object;
       if (s.client_reference_id) {
-        await byUser(s.client_reference_id, { subscription_status: "active", stripe_customer_id: s.customer || null });
+        result = await byUser(s.client_reference_id, { subscription_status: "active", stripe_customer_id: s.customer || null });
       }
     } else if (evt.type === "customer.subscription.updated") {
       const sub = evt.data.object;
       const status = sub.status === "active" || sub.status === "trialing" ? "active" : "canceled";
-      if (sub.metadata && sub.metadata.user_id) await byUser(sub.metadata.user_id, { subscription_status: status });
-      else if (sub.customer) await byCustomer(sub.customer, { subscription_status: status });
+      if (sub.metadata && sub.metadata.user_id) result = await byUser(sub.metadata.user_id, { subscription_status: status });
+      else if (sub.customer) result = await byCustomer(sub.customer, { subscription_status: status });
     } else if (evt.type === "customer.subscription.deleted") {
       const sub = evt.data.object;
-      if (sub.metadata && sub.metadata.user_id) await byUser(sub.metadata.user_id, { subscription_status: "canceled" });
-      else if (sub.customer) await byCustomer(sub.customer, { subscription_status: "canceled" });
+      if (sub.metadata && sub.metadata.user_id) result = await byUser(sub.metadata.user_id, { subscription_status: "canceled" });
+      else if (sub.customer) result = await byCustomer(sub.customer, { subscription_status: "canceled" });
+    }
+    // If Supabase rejected the update (e.g. wrong service key), report it instead of pretending success.
+    if (result && result.error) {
+      return { statusCode: 500, body: `Supabase update failed: ${result.error.message}` };
     }
     return { statusCode: 200, body: JSON.stringify({ received: true }) };
   } catch (e) {
