@@ -16,7 +16,11 @@
 > drive trials → subscribers. Use the agent-planning prompt and my answers."
 
 ## Outstanding before launch
-- Payment test not yet run (subscription_status = 'trialing', stripe_customer_id NULL). Run the 4242 test.
+- Payment test not yet run (subscription_status = 'trialing', stripe_customer_id NULL). Run the 4242 test
+  via the PAYWALL's Subscribe button (the only test-mode path).
+- ⚠️ Landing-page Pricing buttons + final-CTA "Get Annual" still link to OLD static LIVE Stripe payment
+  links (buy.stripe.com/...). They bypass the trial/account/gating system and charge real money.
+  Rewire them to route through sign-up → paywall (single gated flow) before launch.
 - Go-live steps + domain: see the "TO GO LIVE" section below.
 
 ## NEXT: Revenue machine (4 AI agents) — owner to provide
