@@ -8,20 +8,33 @@
 
 ## Hand-off prompt to start next session
 > "Continue Fuel Tracker. Phase 1 (accounts + cloud sync) and Phase 2 (Stripe
-> subscriptions/gating) are DONE & live in TEST mode. Read docs/PHASE1-PLAN.md.
-> Two things left, then the new focus:
->  (a) finish the live payment TEST (status still 'trialing' — run the 4242 test),
->  (b) optional: go LIVE in Stripe + connect domain.
+> subscriptions/gating) are DONE & FULLY VERIFIED in TEST mode (test payment →
+> webhook 200 OK → profiles.subscription_status flipped to 'active'). Read
+> docs/PHASE1-PLAN.md. Remaining before real money:
+>  (a) rewire landing-page Pricing buttons (still old LIVE buy.stripe.com links),
+>  (b) add '← Back to home' link on the Paywall,
+>  (c) go LIVE in Stripe + connect domain.
 > NEW FOCUS: build my 4 AI marketing agents (content, posting, email, YouTube) to
 > drive trials → subscribers. Use the agent-planning prompt and my answers."
 
 ## Outstanding before launch
-- Payment test not yet run (subscription_status = 'trialing', stripe_customer_id NULL). Run the 4242 test
-  via the PAYWALL's Subscribe button (the only test-mode path).
+- ✅ DONE — Payment test PASSED in TEST mode: paywall → Stripe Checkout → test card 4242 →
+  webhook delivered **200 OK** → `profiles.subscription_status` = 'active'. Verified end to end.
 - ⚠️ Landing-page Pricing buttons + final-CTA "Get Annual" still link to OLD static LIVE Stripe payment
   links (buy.stripe.com/...). They bypass the trial/account/gating system and charge real money.
   Rewire them to route through sign-up → paywall (single gated flow) before launch.
+- Add a "← Back to home" link on the Paywall (small UX polish, still pending).
 - Go-live steps + domain: see the "TO GO LIVE" section below.
+
+## ⚠️ Webhook gotcha (fixed — don't repeat)
+- The Stripe webhook function originally used the `@supabase/supabase-js` SDK. That SDK
+  **failed to bundle on Netlify** and the function crashed at startup → empty function log →
+  Stripe showed **502 ERR** on every delivery (so subscription_status never updated).
+- FIX: `netlify/functions/stripe-webhook.js` now talks to Supabase via its **REST API with
+  plain `fetch()`** (PATCH /rest/v1/profiles) — no SDK, no bundling risk. Keep it that way.
+- Reminder of the env-var homes (the recurring mistake): `price_…` → STRIPE_PRICE_ID ·
+  `sk_test_…`/`sk_live_…` → STRIPE_SECRET_KEY · `whsec_…` → STRIPE_WEBHOOK_SECRET ·
+  `https://xxxx.supabase.co` → SUPABASE_URL · `sb_secret_…` → SUPABASE_SERVICE_ROLE_KEY.
 
 ## NEXT: Revenue machine (4 AI agents) — owner to provide
 - Audience, brand voice, which social/email accounts exist, monthly budget, hands-off level.
