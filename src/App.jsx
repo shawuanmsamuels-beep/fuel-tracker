@@ -599,7 +599,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
 }
 
 // ── PRICING CARD ─────────────────────────────────────────────────────────────
-function PricingCard({ plan, price, period, badge, features, cta, ctaLink, highlight }) {
+function PricingCard({ plan, price, period, badge, features, cta, onCta, highlight }) {
   return (
     <div style={{
       background: highlight ? "linear-gradient(135deg,#C8F564 0%,#a8e044 100%)" : "#13132a",
@@ -628,14 +628,15 @@ function PricingCard({ plan, price, period, badge, features, cta, ctaLink, highl
           </div>
         ))}
       </div>
-      <a href={ctaLink} target="_blank" rel="noopener noreferrer" style={{
-        display: "block", textAlign: "center", padding: "14px 0",
+      <button onClick={onCta} style={{
+        display: "block", width: "100%", textAlign: "center", padding: "14px 0",
         background: highlight ? "#0d0d1a" : "#C8F564",
         color: highlight ? "#C8F564" : "#0d0d1a",
+        border: "none", cursor: "pointer",
         borderRadius: 12, fontFamily: "'Syne',sans-serif", fontWeight: 800,
-        fontSize: 14, letterSpacing: 1, textDecoration: "none",
+        fontSize: 14, letterSpacing: 1,
         boxShadow: highlight ? "none" : "0 4px 20px #C8F56430",
-      }}>{cta}</a>
+      }}>{cta}</button>
       <div style={{ textAlign: "center", marginTop: 12, fontSize: 10, opacity: 0.5, fontFamily: "'DM Mono',monospace" }}>30-day money-back guarantee</div>
     </div>
   );
@@ -731,7 +732,7 @@ function Auth({ onAuthed }) {
 }
 
 // ── PAYWALL (trial ended / subscription needed) ──────────────────────────────
-function Paywall({ reason, onLogout, userId, email }) {
+function Paywall({ reason, onLogout, onBack, userId, email }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
   const title = reason === "canceled" ? "Your subscription ended"
@@ -767,7 +768,11 @@ function Paywall({ reason, onLogout, userId, email }) {
         </button>
         {err && <div style={{ color: "#FF6B6B", fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>{err}</div>}
         <div style={{ fontSize: 11, color: "#555", marginBottom: 18 }}>🛡️ 30-day money-back guarantee · Secure checkout by Stripe</div>
-        <button onClick={onLogout} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>Log out</button>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14 }}>
+          {onBack && <button onClick={onBack} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>← Back to home</button>}
+          {onBack && <span style={{ color: "#333", fontSize: 12 }}>·</span>}
+          <button onClick={onLogout} style={{ background: "none", border: "none", color: "#666", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>Log out</button>
+        </div>
       </div>
     </div>
   );
@@ -991,7 +996,7 @@ export default function App() {
           .ft-row{transition:background .15s} .ft-row:hover{background:#33354a !important}
           .ft-item{transition:background .15s} .ft-item:hover{background:#262838}`}</style>
         {!access.allowed ? (
-          <Paywall reason={access.reason} onLogout={handleLogout} userId={user?.id} email={user?.email} />
+          <Paywall reason={access.reason} onLogout={handleLogout} onBack={() => setView("landing")} userId={user?.id} email={user?.email} />
         ) : (
           <>
             {access.reason === "trial" && typeof access.daysLeft === "number" && (
@@ -1155,10 +1160,10 @@ export default function App() {
         <div style={{ display: "flex", gap: 24, maxWidth: 860, margin: "0 auto", flexWrap: "wrap", justifyContent: "center", alignItems: "flex-start" }}>
           <PricingCard plan="MONTHLY" price="$9.99" period="/ month" badge={null} highlight={false}
             features={["Full calorie & macro tracking", "3M+ food database (live search)", "Personalised calorie goals", "Auto-save — never lose data", "7-day free trial included", "Cancel anytime"]}
-            cta="Start Free Trial" ctaLink="https://buy.stripe.com/28E3cw5Jy9kUbWo49G28802" />
+            cta="Start Free Trial" onCta={handleStartTrial} />
           <PricingCard plan="ANNUAL" price="$79" period="/ year" badge="BEST VALUE — SAVE 34%" highlight={true}
             features={["Everything in Monthly", "Priority customer support", "Early access to new features", "Nutrition coaching resources", "7-day free trial included", "One payment, full year access"]}
-            cta="Get Annual Plan" ctaLink="https://buy.stripe.com/8x2cN67RG40AbWo7lS28803" />
+            cta="Get Annual Plan" onCta={handleStartTrial} />
         </div>
         <div style={{ textAlign: "center", marginTop: 32, color: "#555", fontSize: 12 }}>
           Annual saves you <span style={{ color: "#C8F564" }}>$40.88</span> vs monthly · 🛡️ 30-day money-back guarantee on all plans
@@ -1185,9 +1190,9 @@ export default function App() {
             <button onClick={handleStartTrial} style={{ background: "#C8F564", color: "#0d0d1a", border: "none", borderRadius: 14, padding: "18px 42px", cursor: "pointer", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16 }}>
               Try Free for 7 Days →
             </button>
-            <a href="https://buy.stripe.com/5kQfZi4Fu9kU4tW21y28801" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", background: "transparent", color: "#e8e8f0", border: "1px solid #2a2a40", borderRadius: 14, padding: "18px 42px", fontFamily: "'DM Mono',monospace", fontSize: 13, textDecoration: "none" }}>
+            <button onClick={handleStartTrial} style={{ display: "inline-flex", alignItems: "center", background: "transparent", color: "#e8e8f0", border: "1px solid #2a2a40", borderRadius: 14, padding: "18px 42px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 13 }}>
               Get Annual — $79/yr
-            </a>
+            </button>
           </div>
           <div style={{ marginTop: 20, color: "#444", fontSize: 12 }}>🛡️ 30-day money-back guarantee · No credit card for trial</div>
         </div>
