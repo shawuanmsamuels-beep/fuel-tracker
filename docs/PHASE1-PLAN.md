@@ -92,14 +92,25 @@ choice (hosted auth + Postgres database, generous free tier).
 - ✅ **Stage 2a (trial + gating) — DONE & live.** `accessInfo()` in `src/cloud.js`;
   Paywall + "trial days left" banner in `src/App.jsx`. Columns `subscription_status`
   (default 'trialing') and `trial_ends_at` (default now()+7 days) added to `profiles`.
-- ✅ **Stage 2b code — BUILT & deployed, but INERT until Netlify env vars are set.**
+- ✅ **Stage 2b — COMPLETE & VERIFIED in Stripe TEST mode** (paywall → Checkout → webhook auto-unlocks; tested with card 4242). All 5 Netlify env vars set; test webhook "upbeat-brilliance" live.
   - `netlify/functions/create-checkout.js` (opens Stripe Checkout)
   - `netlify/functions/stripe-webhook.js` (verifies events → updates `subscription_status` via Supabase service key)
   - Paywall "Subscribe" button calls create-checkout; app re-checks status on `?checkout=success`.
   - `netlify.toml` has functions dir + Node 20; `stripe` is a dependency.
 - ✅ Privacy Policy + Terms of Service pages added (footer links).
-- ⛔ **BLOCKED:** owner is locked out of Stripe (2FA reset in progress, ~12h). Stage 2b
-  finishes once they're back in.
+- ✅ Stripe 2FA resolved; payments fully working in test mode.
+
+## ⚠️ TO GO LIVE (accept real money) — still to do
+Everything above is **TEST mode**. To take real payments, redo in **LIVE mode**:
+1. Stripe Live mode → create live $9.99/mo Price (live `price_...`) + get live `sk_live_...`.
+2. Create a live webhook (same URL) → live `whsec_...`.
+3. In Netlify, swap STRIPE_SECRET_KEY / STRIPE_PRICE_ID / STRIPE_WEBHOOK_SECRET to live values → redeploy. (Supabase vars unchanged.)
+4. Finish Stripe account activation (business details + bank) so payouts work.
+5. Connect custom domain (shawuanwrites.com — likely a subdomain) + update Supabase Site URL and the create-checkout SITE_URL.
+
+## Housekeeping
+- Revoke the OLD Supabase secret key shared earlier (confirm revoked).
+- Optional polish: US units (lbs / ft-in) toggle; add an annual plan price.
 
 ## Remaining steps to finish Stage 2b (when Stripe is accessible)
 1. **Supabase SQL:** `alter table public.profiles add column if not exists stripe_customer_id text;`
