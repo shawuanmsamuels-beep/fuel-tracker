@@ -6,10 +6,22 @@
 > before building. Keep the landing page **dark** (the owner likes it); brightening
 > applies to the in-app tracker only.
 
-## Hand-off prompt to start tomorrow
-> "Continue Fuel Tracker. We finished the UI polish, weight tracking, brightened
-> tracker, and improved search — all live on Netlify. Today is **Phase 1: add
-> Supabase accounts + cloud sync.** Read docs/PHASE1-PLAN.md first."
+## Hand-off prompt to start next session
+> "Continue Fuel Tracker. Phase 1 (accounts + cloud sync) and Phase 2 (Stripe
+> subscriptions/gating) are DONE & live in TEST mode. Read docs/PHASE1-PLAN.md.
+> Two things left, then the new focus:
+>  (a) finish the live payment TEST (status still 'trialing' — run the 4242 test),
+>  (b) optional: go LIVE in Stripe + connect domain.
+> NEW FOCUS: build my 4 AI marketing agents (content, posting, email, YouTube) to
+> drive trials → subscribers. Use the agent-planning prompt and my answers."
+
+## Outstanding before launch
+- Payment test not yet run (subscription_status = 'trialing', stripe_customer_id NULL). Run the 4242 test.
+- Go-live steps + domain: see the "TO GO LIVE" section below.
+
+## NEXT: Revenue machine (4 AI agents) — owner to provide
+- Audience, brand voice, which social/email accounts exist, monthly budget, hands-off level.
+- Agents envisioned: Content, Posting/Scheduling, Email, YouTube. (Agent-planning prompt already drafted with the owner.)
 
 ---
 
