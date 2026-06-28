@@ -1,9 +1,14 @@
 // Serverless function: receives Stripe events and updates the user's subscription
 // status in Supabase. Verifies the Stripe signature so only real Stripe events act.
+//
+// We talk to Supabase via its REST API using plain fetch() (built into Node 20)
+// instead of the @supabase/supabase-js SDK. The SDK is heavy and was failing to
+// bundle on Netlify (the function crashed at startup with an empty log / 502).
+// A simple fetch keeps this function tiny and reliable.
+//
 // Required Netlify env vars:
 //   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 const Stripe = require("stripe");
-const { createClient } = require("@supabase/supabase-js");
 
 exports.handler = async (event) => {
   const secret = process.env.STRIPE_SECRET_KEY;
@@ -24,25 +29,45 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: `Signature verification failed: ${err.message}` };
   }
 
-  const supabase = createClient(supaUrl, serviceKey);
-  const byUser = (userId, fields) => supabase.from("profiles").update(fields).eq("user_id", userId);
-  const byCustomer = (customerId, fields) => supabase.from("profiles").update(fields).eq("stripe_customer_id", customerId);
+  // Update matching profiles row(s) via the Supabase REST API.
+  // column is "user_id" or "stripe_customer_id".
+  const updateProfile = async (column, value, fields) => {
+    const base = supaUrl.replace(/\/$/, "");
+    const url = `${base}/rest/v1/profiles?${column}=eq.${encodeURIComponent(value)}`;
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(fields),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Supabase update failed (${res.status}): ${text}`);
+    }
+  };
 
   try {
     if (evt.type === "checkout.session.completed") {
       const s = evt.data.object;
       if (s.client_reference_id) {
-        await byUser(s.client_reference_id, { subscription_status: "active", stripe_customer_id: s.customer || null });
+        await updateProfile("user_id", s.client_reference_id, {
+          subscription_status: "active",
+          stripe_customer_id: s.customer || null,
+        });
       }
     } else if (evt.type === "customer.subscription.updated") {
       const sub = evt.data.object;
       const status = sub.status === "active" || sub.status === "trialing" ? "active" : "canceled";
-      if (sub.metadata && sub.metadata.user_id) await byUser(sub.metadata.user_id, { subscription_status: status });
-      else if (sub.customer) await byCustomer(sub.customer, { subscription_status: status });
+      if (sub.metadata && sub.metadata.user_id) await updateProfile("user_id", sub.metadata.user_id, { subscription_status: status });
+      else if (sub.customer) await updateProfile("stripe_customer_id", sub.customer, { subscription_status: status });
     } else if (evt.type === "customer.subscription.deleted") {
       const sub = evt.data.object;
-      if (sub.metadata && sub.metadata.user_id) await byUser(sub.metadata.user_id, { subscription_status: "canceled" });
-      else if (sub.customer) await byCustomer(sub.customer, { subscription_status: "canceled" });
+      if (sub.metadata && sub.metadata.user_id) await updateProfile("user_id", sub.metadata.user_id, { subscription_status: "canceled" });
+      else if (sub.customer) await updateProfile("stripe_customer_id", sub.customer, { subscription_status: "canceled" });
     }
     return { statusCode: 200, body: JSON.stringify({ received: true }) };
   } catch (e) {

@@ -6,10 +6,26 @@
 > before building. Keep the landing page **dark** (the owner likes it); brightening
 > applies to the in-app tracker only.
 
-## Hand-off prompt to start tomorrow
-> "Continue Fuel Tracker. We finished the UI polish, weight tracking, brightened
-> tracker, and improved search — all live on Netlify. Today is **Phase 1: add
-> Supabase accounts + cloud sync.** Read docs/PHASE1-PLAN.md first."
+## Hand-off prompt to start next session
+> "Continue Fuel Tracker. Phase 1 (accounts + cloud sync) and Phase 2 (Stripe
+> subscriptions/gating) are DONE & live in TEST mode. Read docs/PHASE1-PLAN.md.
+> Two things left, then the new focus:
+>  (a) finish the live payment TEST (status still 'trialing' — run the 4242 test),
+>  (b) optional: go LIVE in Stripe + connect domain.
+> NEW FOCUS: build my 4 AI marketing agents (content, posting, email, YouTube) to
+> drive trials → subscribers. Use the agent-planning prompt and my answers."
+
+## Outstanding before launch
+- Payment test not yet run (subscription_status = 'trialing', stripe_customer_id NULL). Run the 4242 test
+  via the PAYWALL's Subscribe button (the only test-mode path).
+- ⚠️ Landing-page Pricing buttons + final-CTA "Get Annual" still link to OLD static LIVE Stripe payment
+  links (buy.stripe.com/...). They bypass the trial/account/gating system and charge real money.
+  Rewire them to route through sign-up → paywall (single gated flow) before launch.
+- Go-live steps + domain: see the "TO GO LIVE" section below.
+
+## NEXT: Revenue machine (4 AI agents) — owner to provide
+- Audience, brand voice, which social/email accounts exist, monthly budget, hands-off level.
+- Agents envisioned: Content, Posting/Scheduling, Email, YouTube. (Agent-planning prompt already drafted with the owner.)
 
 ---
 
@@ -92,14 +108,25 @@ choice (hosted auth + Postgres database, generous free tier).
 - ✅ **Stage 2a (trial + gating) — DONE & live.** `accessInfo()` in `src/cloud.js`;
   Paywall + "trial days left" banner in `src/App.jsx`. Columns `subscription_status`
   (default 'trialing') and `trial_ends_at` (default now()+7 days) added to `profiles`.
-- ✅ **Stage 2b code — BUILT & deployed, but INERT until Netlify env vars are set.**
+- ✅ **Stage 2b — COMPLETE & VERIFIED in Stripe TEST mode** (paywall → Checkout → webhook auto-unlocks; tested with card 4242). All 5 Netlify env vars set; test webhook "upbeat-brilliance" live.
   - `netlify/functions/create-checkout.js` (opens Stripe Checkout)
   - `netlify/functions/stripe-webhook.js` (verifies events → updates `subscription_status` via Supabase service key)
   - Paywall "Subscribe" button calls create-checkout; app re-checks status on `?checkout=success`.
   - `netlify.toml` has functions dir + Node 20; `stripe` is a dependency.
 - ✅ Privacy Policy + Terms of Service pages added (footer links).
-- ⛔ **BLOCKED:** owner is locked out of Stripe (2FA reset in progress, ~12h). Stage 2b
-  finishes once they're back in.
+- ✅ Stripe 2FA resolved; payments fully working in test mode.
+
+## ⚠️ TO GO LIVE (accept real money) — still to do
+Everything above is **TEST mode**. To take real payments, redo in **LIVE mode**:
+1. Stripe Live mode → create live $9.99/mo Price (live `price_...`) + get live `sk_live_...`.
+2. Create a live webhook (same URL) → live `whsec_...`.
+3. In Netlify, swap STRIPE_SECRET_KEY / STRIPE_PRICE_ID / STRIPE_WEBHOOK_SECRET to live values → redeploy. (Supabase vars unchanged.)
+4. Finish Stripe account activation (business details + bank) so payouts work.
+5. Connect custom domain (shawuanwrites.com — likely a subdomain) + update Supabase Site URL and the create-checkout SITE_URL.
+
+## Housekeeping
+- Revoke the OLD Supabase secret key shared earlier (confirm revoked).
+- Optional polish: US units (lbs / ft-in) toggle; add an annual plan price.
 
 ## Remaining steps to finish Stage 2b (when Stripe is accessible)
 1. **Supabase SQL:** `alter table public.profiles add column if not exists stripe_customer_id text;`
