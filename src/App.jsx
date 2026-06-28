@@ -394,8 +394,8 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
           {profile && (onOpenSettings && !embedded
             ? <button onClick={onOpenSettings} title="Account settings" style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace", cursor: "pointer" }}>{profile.name?.split(" ")[0]} ⚙</button>
             : <div style={{ background: "#C8F56420", border: "1px solid #C8F56440", borderRadius: 20, padding: "5px 12px", fontSize: 11, color: "#C8F564", fontFamily: "'DM Mono',monospace" }}>{profile.name?.split(" ")[0]}</div>)}
+          {!embedded && onBack && <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#666", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>← Home</button>}
           {!embedded && userId && onLogout && <button onClick={onLogout} style={{ background: "none", border: "1px solid #2a2a40", color: "#888", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>Log out</button>}
-          {!embedded && !userId && onBack && <button onClick={onBack} style={{ background: "none", border: "1px solid #2a2a40", color: "#666", borderRadius: 8, padding: "5px 12px", cursor: "pointer", fontFamily: "'DM Mono',monospace", fontSize: 10 }}>← Exit</button>}
         </div>
       </div>
 
