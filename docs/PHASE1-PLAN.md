@@ -129,33 +129,35 @@ choice (hosted auth + Postgres database, generous free tier).
 - ✅ Privacy Policy + Terms of Service pages added (footer links).
 - ✅ Stripe 2FA resolved; payments fully working in test mode.
 
-## ⚠️ GO LIVE (accept real money) — IN PROGRESS
-Everything in Stage 2b is **TEST mode**. Going live = redo it in **LIVE mode**.
+## ✅ GO LIVE (accept real money) — DONE & VERIFIED (Jun 29 2026)
+Fuel Tracker is **LIVE in Stripe and taking real payments**, verified end to end.
 
-### Done already
-- ✅ Stripe account **activated** for live payments (payments enabled).
-- ✅ Live **product + price created**: "Fuel Tracker Monthly" $9.99/mo recurring →
+### What's live
+- ✅ Stripe account activated for live payments.
+- ✅ Live product + price: "Fuel Tracker Monthly" $9.99/mo recurring →
   **live `price_1TnQyzKuzbOTbTBSSsuvIloS`** (product `prod_Un11AsxWGqoGjd`).
+- ✅ Live `sk_live_` secret key in Netlify (note: a key was once pasted in chat → **rolled**).
+- ✅ Live webhook created (endpoint `/.netlify/functions/stripe-webhook`, 3 events).
+- ✅ Netlify env vars set to LIVE values (`STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`,
+  `STRIPE_WEBHOOK_SECRET`) with "same value for all deploy contexts", then redeployed.
+- ✅ **Verified with a REAL debit card**: paywall → live Checkout → payment succeeded →
+  webhook unlocked the account → then **refunded + subscription canceled** in Stripe.
 
-### ⏸️ BLOCKED (resume here): Stripe 2FA lockout
-- Can't reveal the live `sk_live_` secret key — 2FA requires the authenticator code,
-  but there is **no Stripe entry in the owner's Google Authenticator** (only Amazon),
-  and no backup code saved. Owner submitted **Stripe account recovery** (~12h review,
-  ~Jun 28–29 2026). When the reset email arrives: re-enroll 2FA in Google Authenticator
-  AND save the backup code this time.
+### 2FA note (resolved)
+- Owner was locked out of Stripe 2FA (no Stripe entry in Google Authenticator). Got back in
+  with a **saved backup code**. Re-enroll Stripe in the authenticator + save fresh backup codes.
 
-### Remaining once 2FA is back (≈10 min)
-1. Reveal/copy the live **`sk_live_...`** secret key (Developers → API keys, Live mode).
-2. Create a **live webhook** → endpoint `https://fueltracker-app.netlify.app/.netlify/functions/stripe-webhook`,
-   events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
-   → copy live **`whsec_...`**.
-3. In **Netlify** env vars, swap to LIVE values (Supabase vars unchanged), then **redeploy once**:
-   - `STRIPE_SECRET_KEY` = `sk_live_...`
-   - `STRIPE_PRICE_ID` = `price_1TnQyzKuzbOTbTBSSsuvIloS`
-   - `STRIPE_WEBHOOK_SECRET` = live `whsec_...`
-4. Quick **real-card test** (small charge → confirm webhook 200 + status active → refund).
-5. (Optional, later) Connect custom domain (shawuanwrites.com subdomain) + update Supabase
-   Site URL and create-checkout SITE_URL.
+### Owner housekeeping
+- After the test cancel, re-grant own access: `update public.profiles set subscription_status='active';`
+- Optional, later: connect custom domain (shawuanwrites.com subdomain) → update Supabase Site URL
+  and create-checkout SITE_URL.
+
+## ✅ SECOND PRODUCT — "Ship It Without Code" starter kit (LIVE)
+- $19.99 digital product (50 prompts + Fuel Tracker build story + 3 worksheets).
+- Selling via **Gumroad**: https://shawuan.gumroad.com/l/xchqep
+- Custom sales page built: `marketing/ship-it-without-code/index.html` (Buy buttons wired to Gumroad).
+  To publish: drag the HTML onto app.netlify.com/drop, or host on shawuanwrites.com.
+- Product PDF was generated and delivered to the owner (kept OUT of the repo on purpose).
 
 ## Housekeeping
 - Revoke the OLD Supabase secret key shared earlier (confirm revoked).
