@@ -129,13 +129,33 @@ choice (hosted auth + Postgres database, generous free tier).
 - ✅ Privacy Policy + Terms of Service pages added (footer links).
 - ✅ Stripe 2FA resolved; payments fully working in test mode.
 
-## ⚠️ TO GO LIVE (accept real money) — still to do
-Everything above is **TEST mode**. To take real payments, redo in **LIVE mode**:
-1. Stripe Live mode → create live $9.99/mo Price (live `price_...`) + get live `sk_live_...`.
-2. Create a live webhook (same URL) → live `whsec_...`.
-3. In Netlify, swap STRIPE_SECRET_KEY / STRIPE_PRICE_ID / STRIPE_WEBHOOK_SECRET to live values → redeploy. (Supabase vars unchanged.)
-4. Finish Stripe account activation (business details + bank) so payouts work.
-5. Connect custom domain (shawuanwrites.com — likely a subdomain) + update Supabase Site URL and the create-checkout SITE_URL.
+## ⚠️ GO LIVE (accept real money) — IN PROGRESS
+Everything in Stage 2b is **TEST mode**. Going live = redo it in **LIVE mode**.
+
+### Done already
+- ✅ Stripe account **activated** for live payments (payments enabled).
+- ✅ Live **product + price created**: "Fuel Tracker Monthly" $9.99/mo recurring →
+  **live `price_1TnQyzKuzbOTbTBSSsuvIloS`** (product `prod_Un11AsxWGqoGjd`).
+
+### ⏸️ BLOCKED (resume here): Stripe 2FA lockout
+- Can't reveal the live `sk_live_` secret key — 2FA requires the authenticator code,
+  but there is **no Stripe entry in the owner's Google Authenticator** (only Amazon),
+  and no backup code saved. Owner submitted **Stripe account recovery** (~12h review,
+  ~Jun 28–29 2026). When the reset email arrives: re-enroll 2FA in Google Authenticator
+  AND save the backup code this time.
+
+### Remaining once 2FA is back (≈10 min)
+1. Reveal/copy the live **`sk_live_...`** secret key (Developers → API keys, Live mode).
+2. Create a **live webhook** → endpoint `https://fueltracker-app.netlify.app/.netlify/functions/stripe-webhook`,
+   events `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+   → copy live **`whsec_...`**.
+3. In **Netlify** env vars, swap to LIVE values (Supabase vars unchanged), then **redeploy once**:
+   - `STRIPE_SECRET_KEY` = `sk_live_...`
+   - `STRIPE_PRICE_ID` = `price_1TnQyzKuzbOTbTBSSsuvIloS`
+   - `STRIPE_WEBHOOK_SECRET` = live `whsec_...`
+4. Quick **real-card test** (small charge → confirm webhook 200 + status active → refund).
+5. (Optional, later) Connect custom domain (shawuanwrites.com subdomain) + update Supabase
+   Site URL and create-checkout SITE_URL.
 
 ## Housekeeping
 - Revoke the OLD Supabase secret key shared earlier (confirm revoked).
