@@ -389,7 +389,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
             <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 800, letterSpacing: -1, color: "#C8F564" }}>FUEL</span>
             <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 800, letterSpacing: -1 }}>TRACKER</span>
           </div>
-          <div style={{ color: "#444", fontSize: 9, letterSpacing: 3 }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase()}</div>
+          <div style={{ color: "#9a9cb4", fontSize: 9, letterSpacing: 3 }}>{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase()}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {saved && <span style={{ fontSize: 10, color: "#C8F564", letterSpacing: 1 }}>✓ SAVED</span>}
@@ -435,7 +435,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
                   padding: "4px 10px", borderRadius: 20, border: "1px solid",
                   borderColor: selectedMeal === m ? "#C8F564" : "#2a2a40",
                   background: selectedMeal === m ? "#C8F56420" : "transparent",
-                  color: selectedMeal === m ? "#C8F564" : "#666",
+                  color: selectedMeal === m ? "#C8F564" : "#b0b2c8",
                   fontFamily: "'DM Mono',monospace", fontSize: 10, cursor: "pointer",
                 }}>{m}</button>
               ))}
@@ -466,11 +466,11 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
               )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
-              <span style={{ color: "#444", fontSize: 10 }}>QTY</span>
+              <span style={{ color: "#9a9cb4", fontSize: 10 }}>QTY</span>
               <button onClick={() => setQty(q => Math.max(0.5, Number(q) - 0.5))} style={{ width: 28, height: 28, background: "#1e1e30", border: "none", color: "#e8e8f0", borderRadius: 6, cursor: "pointer", fontSize: 16 }}>−</button>
               <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15, minWidth: 22, textAlign: "center" }}>{qty}</span>
               <button onClick={() => setQty(q => Number(q) + 0.5)} style={{ width: 28, height: 28, background: "#1e1e30", border: "none", color: "#e8e8f0", borderRadius: 6, cursor: "pointer", fontSize: 16 }}>+</button>
-              <span style={{ color: "#555", fontSize: 10, marginLeft: 4 }}>× 100g servings</span>
+              <span style={{ color: "#9a9cb4", fontSize: 10, marginLeft: 4 }}>× 100g servings</span>
             </div>
           </div>
 
@@ -499,7 +499,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
           ))}
 
           {entries.length === 0 && (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "#6a6c84" }}>
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#9a9cb4" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>🍽</div>
               <div style={{ fontSize: 10, letterSpacing: 2 }}>SEARCH FOR A FOOD TO GET STARTED</div>
             </div>
@@ -552,7 +552,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
                 onKeyDown={e => e.key === "Enter" && logWeight()}
                 placeholder={todayWeight ? `${todayWeight.weight} kg` : "Enter weight"}
                 style={{ flex: 1, padding: "12px 14px", background: "#0d0d1a", border: "1px solid #2a2a40", borderRadius: 8, color: "#e8e8f0", fontFamily: "'DM Mono',monospace", fontSize: 14 }} />
-              <span style={{ color: "#444", fontSize: 12 }}>kg</span>
+              <span style={{ color: "#9a9cb4", fontSize: 12 }}>kg</span>
               <button onClick={logWeight} disabled={!weightInput}
                 style={{ padding: "0 18px", height: 42, background: weightInput ? "#C8F564" : "#1e1e30", color: weightInput ? "#0d0d1a" : "#555", border: "none", borderRadius: 8, cursor: weightInput ? "pointer" : "default", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 13 }}>
                 {todayWeight ? "Update" : "Save"}
@@ -561,7 +561,7 @@ function TrackerApp({ profile, onBack, embedded = false, userId = null, onLogout
           </div>
 
           {sortedWeights.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "32px 0", color: "#6a6c84" }}>
+            <div style={{ textAlign: "center", padding: "32px 0", color: "#9a9cb4" }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>📉</div>
               <div style={{ fontSize: 10, letterSpacing: 2 }}>LOG YOUR WEIGHT TO SEE PROGRESS</div>
             </div>
