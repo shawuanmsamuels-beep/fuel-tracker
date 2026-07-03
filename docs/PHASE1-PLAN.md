@@ -129,13 +129,35 @@ choice (hosted auth + Postgres database, generous free tier).
 - ✅ Privacy Policy + Terms of Service pages added (footer links).
 - ✅ Stripe 2FA resolved; payments fully working in test mode.
 
-## ⚠️ TO GO LIVE (accept real money) — still to do
-Everything above is **TEST mode**. To take real payments, redo in **LIVE mode**:
-1. Stripe Live mode → create live $9.99/mo Price (live `price_...`) + get live `sk_live_...`.
-2. Create a live webhook (same URL) → live `whsec_...`.
-3. In Netlify, swap STRIPE_SECRET_KEY / STRIPE_PRICE_ID / STRIPE_WEBHOOK_SECRET to live values → redeploy. (Supabase vars unchanged.)
-4. Finish Stripe account activation (business details + bank) so payouts work.
-5. Connect custom domain (shawuanwrites.com — likely a subdomain) + update Supabase Site URL and the create-checkout SITE_URL.
+## ✅ GO LIVE (accept real money) — DONE & VERIFIED (Jun 29 2026)
+Fuel Tracker is **LIVE in Stripe and taking real payments**, verified end to end.
+
+### What's live
+- ✅ Stripe account activated for live payments.
+- ✅ Live product + price: "Fuel Tracker Monthly" $9.99/mo recurring →
+  **live `price_1TnQyzKuzbOTbTBSSsuvIloS`** (product `prod_Un11AsxWGqoGjd`).
+- ✅ Live `sk_live_` secret key in Netlify (note: a key was once pasted in chat → **rolled**).
+- ✅ Live webhook created (endpoint `/.netlify/functions/stripe-webhook`, 3 events).
+- ✅ Netlify env vars set to LIVE values (`STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`,
+  `STRIPE_WEBHOOK_SECRET`) with "same value for all deploy contexts", then redeployed.
+- ✅ **Verified with a REAL debit card**: paywall → live Checkout → payment succeeded →
+  webhook unlocked the account → then **refunded + subscription canceled** in Stripe.
+
+### 2FA note (resolved)
+- Owner was locked out of Stripe 2FA (no Stripe entry in Google Authenticator). Got back in
+  with a **saved backup code**. Re-enroll Stripe in the authenticator + save fresh backup codes.
+
+### Owner housekeeping
+- After the test cancel, re-grant own access: `update public.profiles set subscription_status='active';`
+- Optional, later: connect custom domain (shawuanwrites.com subdomain) → update Supabase Site URL
+  and create-checkout SITE_URL.
+
+## ✅ SECOND PRODUCT — "Ship It Without Code" starter kit (LIVE)
+- $19.99 digital product (50 prompts + Fuel Tracker build story + 3 worksheets).
+- Selling via **Gumroad**: https://shawuan.gumroad.com/l/xchqep
+- Custom sales page built: `marketing/ship-it-without-code/index.html` (Buy buttons wired to Gumroad).
+  To publish: drag the HTML onto app.netlify.com/drop, or host on shawuanwrites.com.
+- Product PDF was generated and delivered to the owner (kept OUT of the repo on purpose).
 
 ## Housekeeping
 - Revoke the OLD Supabase secret key shared earlier (confirm revoked).

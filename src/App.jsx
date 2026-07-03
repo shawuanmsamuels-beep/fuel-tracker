@@ -161,7 +161,7 @@ function WeightChart({ data }) {
 }
 
 // ── ONBOARDING ───────────────────────────────────────────────────────────────
-function Onboarding({ onDone }) {
+function Onboarding({ onDone, onBack }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({ name: "", age: "", sex: "male", weight: "", height: "", goal: "lose" });
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -264,8 +264,10 @@ function Onboarding({ onDone }) {
           {step < steps.length - 1 ? "Continue →" : "Let's go! 🚀"}
         </button>
 
-        {step > 0 && (
-          <button onClick={() => setStep(s => s - 1)} style={{ width: "100%", marginTop: 12, padding: "12px 0", background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 12 }}>← Back</button>
+        {(step > 0 || onBack) && (
+          <button onClick={() => (step > 0 ? setStep(s => s - 1) : onBack && onBack())} style={{ width: "100%", marginTop: 12, padding: "12px 0", background: "none", border: "none", color: "#666", cursor: "pointer", fontSize: 12 }}>
+            {step > 0 ? "← Back" : "← Back to home"}
+          </button>
         )}
       </div>
     </div>
@@ -976,7 +978,7 @@ export default function App() {
   if (view === "onboard") return (
     <>
       <style>{`*{box-sizing:border-box;margin:0;padding:0}input{outline:none}`}</style>
-      <Onboarding onDone={async (p) => { if (user) await saveProfile(user.id, p); setProfile(p); setView("app"); }} />
+      <Onboarding onBack={() => setView("landing")} onDone={async (p) => { if (user) await saveProfile(user.id, p); setProfile(p); setView("app"); }} />
     </>
   );
 
