@@ -9,9 +9,9 @@
 - **What it is:** a gentle, low-pressure, inclusive guide that helps parents and
   caregivers potty-train at each child's own pace — without stress, pressure, or shame.
 - **Where to buy:**
-  - Amazon (KDP): `[AMAZON_LINK]`  ← owner to provide
-  - Gumroad: `[EBOOK_GUMROAD_LINK]`  ← owner to provide
-- **Price:** `[PRICE]` ← owner to provide (Amazon and/or Gumroad)
+  - Amazon (KDP): https://www.amazon.com/dp/B0GY3G5HBL
+  - Gumroad: https://shawuan.gumroad.com/l/cmasw
+- **Price:** $7.99 (both sites)
 
 ## Who it's for
 - Parents, caregivers, grandparents, and daycare/childcare providers of toddlers
