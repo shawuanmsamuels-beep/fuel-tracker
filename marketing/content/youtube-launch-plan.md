@@ -426,4 +426,46 @@ Talk soon."
 
 ---
 
+## PART 4: SHORT VERSION — 60-second Reel / TikTok / YouTube Short
+
+> Same story, compressed. Film this in the SAME session (vertical/portrait!).
+> Aim for high energy. Read it out loud a few times so it flows naturally.
+
+### 🎬 60-SECOND SCRIPT (~140 words)
+
+**[0–3s · HOOK — look right at the lens, say it with a little smile]**
+"Twenty years in banking. Zero coding experience. And I just built a real, *paying* app — by myself."
+
+**[3–20s]**
+"No CS degree. No developer. No team. I used AI to write the code — I just described what I wanted in plain English."
+*(cue: hold up your phone / cut to the app)*
+
+**[20–35s]**
+"That's how I built Fuel Tracker — a calorie tracking app with 3 million-plus foods and a free 7-day trial, no credit card."
+*(cue: screen-record — search a food, log it)*
+
+**[35–48s]**
+"Then I packaged the exact 50 prompts I used into a kit, so anyone can do this."
+*(cue: show the kit / Gumroad page)*
+
+**[48–60s · CTA — back on camera]**
+"Here's what nobody tells you: you don't need to learn to *code*. You need to learn to *describe*. And you already know how to do that. Both are live — link in my bio. If I can do this, so can you."
+
+---
+
+### 🔤 On-screen text cues (add in CapCut)
+- 0s: **20 years in banking. Zero code.**
+- 10s: **I used AI to build it →**
+- 22s: **3M+ foods · free trial · no card**
+- 37s: **$19.99 kit — 50 prompts**
+- 48s: **You don't need to code. You need to describe.**
+- 58s: **Link in bio 👆**
+
+---
+
+### ⚡ 30-SECOND ULTRA-SHORT (if you want an even punchier cut)
+"Twenty years in banking. Zero coding experience. I built a real paying app — myself — using AI to write the code. It's called Fuel Tracker: 3 million foods, free 7-day trial, no card. I even packaged the 50 prompts I used into a kit so you can do it too. You don't need to code. You need to describe. Links in my bio."
+
+---
+
 *End of YouTube Launch Plan*
