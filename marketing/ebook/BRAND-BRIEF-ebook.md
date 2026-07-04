@@ -20,6 +20,16 @@
   "3-day" methods, and parents of children who need a more patient, individualized
   approach ("for All Children" = inclusive of different paces, temperaments, and needs).
 
+## Brand colors (match the book cover — teal + gold)
+- **Teal (primary background):** deep teal-green, ~`#1F7F75` (gradient down to `#134E47`).
+- **Gold (accent):** warm gold, ~`#F5CE63` — for highlights, eyebrows, and CTA buttons.
+- **White** `#FFFFFF` for titles/headlines.
+- **Pale teal** ~`#BFDED7` for supporting/subtitle text.
+- **Dark teal** ~`#123F39` for text sitting on the gold accent.
+- Font: friendly rounded sans (Nunito / similar) — approachable, not corporate.
+- Keep it warm, soft, and reassuring — never harsh or clinical.
+> (This is DIFFERENT from Fuel Tracker / the kit, which are dark + lime green. Don't mix them.)
+
 ## Brand voice (very different from the other products)
 - **Warm, calm, reassuring.** Like a kind friend who's been there.
 - **Non-judgmental and shame-free** — this is the whole heart of the book. Never make
