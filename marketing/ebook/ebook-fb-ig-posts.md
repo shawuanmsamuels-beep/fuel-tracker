@@ -39,7 +39,7 @@ Small shifts like this — the kind that actually work in real life — are what
 
 **Hashtags:** #PottyTrainingTips #GentleParenting #ToddlerLife #ParentingTips #NoPressureParenting #EarlyChildhood
 
-**Visual idea:** Close-up of a hand-drawn or text-card graphic with the "try this instead" swap, calm pastel background.
+**Visual idea:** Close-up of a hand-drawn or text-card graphic with the "try this instead" swap, calm teal background with a gold accent.
 
 ---
 

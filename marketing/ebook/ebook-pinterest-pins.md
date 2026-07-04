@@ -7,6 +7,11 @@ Gumroad: https://shawuan.gumroad.com/l/cmasw
 
 Voice reminder: warm, calm, reassuring, shame-free. No "3-day miracle" promises. No medical advice.
 
+**Brand colors (match the book cover):** deep **teal** background (~#1F7F75), warm **gold**
+accent (~#F5CE63), **white** titles, **pale-teal** support text. Font = friendly rounded
+sans (Nunito-style), NOT serif. Keep every pin in this teal + gold palette so pins and book
+look like family.
+
 ---
 
 ## Pin 1
@@ -21,7 +26,7 @@ Potty training doesn't have to be a battle.
 A gentle, no-pressure guide.
 
 **Image Idea:**
-Soft pastel background (sage green or warm cream), a calm illustration or photo of a parent and toddler sitting together near a potty, gentle serif title text at top, small book cover mockup at bottom.
+Deep teal background with a warm gold accent bar, a calm illustration or photo of a parent and toddler sitting together near a potty, white rounded-sans title text at top, small book cover mockup at bottom.
 
 **Board:** Potty Training Tips
 
@@ -41,7 +46,7 @@ How to potty train
 without the stress.
 
 **Image Idea:**
-Warm-toned flat-lay: potty, small step stool, cozy toddler socks, soft natural light, minimal text overlay in calming rounded font.
+Flat-lay over a teal background: potty, small step stool, cozy toddler socks, soft natural light, minimal white text overlay in a calming rounded font with a small gold accent line.
 
 **Board:** Parenting Hacks
 
@@ -61,7 +66,7 @@ Gentle potty training tips
 every tired parent needs.
 
 **Image Idea:**
-Bright, friendly graphic with a numbered-list feel (e.g., "5 Gentle Tips") over a soft illustration of a smiling toddler, muted pastel color palette (blush, mint, butter yellow).
+Friendly graphic on a teal background with a numbered-list feel (e.g., "5 Gentle Tips") in white, a soft illustration of a smiling toddler, gold accent numbers/dots.
 
 **Board:** Toddler Tips
 
@@ -81,7 +86,7 @@ Resistant toddler?
 There's a gentler way.
 
 **Image Idea:**
-Photo-style image of a toddler crossing their arms playfully next to a potty, warm lighting, reassuring caption overlay, soft rounded corners on text box.
+Photo-style image of a toddler crossing their arms playfully next to a potty over a teal wash, warm lighting, white reassuring caption in a rounded, gold-outlined text box.
 
 **Board:** Potty Training Tips
 
@@ -102,7 +107,7 @@ No shame.
 Just gentle progress.
 
 **Image Idea:**
-Minimal, calming design — soft cloud or gentle wave background, single line of the recurring hook in elegant script, small potty icon, muted sage/cream palette.
+Minimal, calming design — teal background with a gentle wave, single line of the recurring hook in white, small gold potty icon.
 
 **Board:** Gentle Parenting
 
@@ -123,7 +128,7 @@ It's not a setback —
 it's part of the process.
 
 **Image Idea:**
-Soft illustrated toddler mid-accident-cleanup moment with a calm, reassuring parent expression (not distressed), warm color tones, gentle reassuring text overlay.
+Soft illustrated toddler mid-cleanup moment with a calm, reassuring parent (not distressed), teal background with gold accents, gentle white reassuring text overlay.
 
 **Board:** Toddler Milestones
 
@@ -143,7 +148,7 @@ Potty training boys,
 the gentle way.
 
 **Image Idea:**
-Warm photo-style image of a toddler boy sitting happily near a potty or stool, soft blue/cream palette, friendly rounded title text.
+Photo-style image of a toddler boy sitting happily near a potty or stool over a teal background, white friendly rounded title text, gold accent.
 
 **Board:** Toddler Tips
 
@@ -163,7 +168,7 @@ Potty training girls,
 one gentle step at a time.
 
 **Image Idea:**
-Soft blush/peach palette, illustrated toddler girl with a happy expression near a potty, gentle serif headline, small book cover mockup in corner.
+Teal background, illustrated toddler girl with a happy expression near a potty, white rounded-sans headline, gold accent, small book cover mockup in corner.
 
 **Board:** Toddler Tips
 
@@ -183,7 +188,7 @@ Is your toddler ready?
 A gentle readiness checklist.
 
 **Image Idea:**
-Clean checklist-style graphic (soft checkmarks, cream background), toddler photo/illustration in corner, calm color palette (sage, cream, dusty rose).
+Clean checklist-style graphic (gold checkmarks on a teal background), toddler photo/illustration in corner, white text.
 
 **Board:** Toddler Milestones
 
@@ -203,7 +208,7 @@ Every child on
 their own timeline.
 
 **Image Idea:**
-Soft gradient background with a gentle path or footprints illustration leading to a potty icon, hand-lettered style headline, warm reassuring palette.
+Teal gradient background with a gentle path or footprints leading to a gold potty icon, white hand-lettered-style headline.
 
 **Board:** Gentle Parenting
 
@@ -224,7 +229,7 @@ You're not alone.
 A calmer way to potty train.
 
 **Image Idea:**
-Warm, cozy image of a tired but smiling parent sitting on the floor with a toddler, soft lamp lighting, comforting caption overlay in a friendly rounded font.
+Cozy image of a tired-but-smiling parent on the floor with a toddler over a teal wash, soft lamp lighting, white comforting caption in a friendly rounded font, gold accent.
 
 **Board:** Parenting Hacks
 
@@ -245,7 +250,7 @@ A low-pressure guide for all children
 $7.99 ebook
 
 **Image Idea:**
-Clean product-style pin: full book cover mockup centered on a soft cream background, subtle price tag graphic, "Available on Amazon & Gumroad" small text at bottom.
+Clean product-style pin: full book cover mockup centered on a deep teal background, a small gold price-tag graphic, "Available on Amazon & Gumroad" in white at bottom.
 
 **Board:** Potty Training Tips
 
