@@ -312,7 +312,10 @@ bio and the description — go build the thing you've been sitting on."
 
 **[0:58–1:00] Tag/end card**
 
-[Cue: end card with kit name + link overlay]
+[Cue: end card — kit name big, with the link on screen as tappable-looking text:
+"👉 shawuan.gumroad.com/l/xchqep". Hold it on screen for the full 2 seconds so
+viewers can read/screenshot it. Keep it inside the safe zone — not too low, or
+the TikTok/Reels UI (caption + buttons) covers it.]
 
 "Ship It Without Code. Link below."
 
